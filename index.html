@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         /* Apply Inter font to the body */
         body {
@@ -19,69 +19,63 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 2rem 1rem; /* Padding top/bottom 2rem, left/right 1rem */
-            background-color: #f7fafc; /* Light gray background */
+            padding: 2rem 1rem;
+            background-color: #f7fafc;
         }
 
-        /* === CSS FIX FOR CENTERING SINGLE CARD === */
-        /* Styling for the grid container holding countdown cards */
+        /* Grid container for countdown cards */
         #multipleCountdownsContainer {
             display: grid;
-            gap: 1.5rem; /* Equivalent to gap-6 */
+            gap: 1.5rem;
             width: 100%;
-            max-width: 6xl; /* Tailwind class equivalent */
-            margin-bottom: 2rem; /* Equivalent to mb-8 */
+            max-width: 6xl;
+            margin-bottom: 2rem;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             justify-content: center;
         }
-        /* Styling for the placeholder message */
+        /* Placeholder message */
         #noActiveCountdowns {
-            grid-column: 1 / -1; /* Span from first to last column line */
+            grid-column: 1 / -1;
             text-align: center;
-            color: #6b7280; /* text-gray-500 */
+            color: #6b7280;
         }
-        /* === END CSS FIX === */
 
-
-        /* Styling for individual countdown cards */
+        /* Individual countdown cards */
         .countdown-card {
             background-color: white;
-            border-radius: 0.75rem; /* Rounded corners */
-            padding: 1.5rem; /* Padding inside the card */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Shadow */
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100%; /* Card takes full width of its grid column */
-            position: relative; /* Needed for absolute positioning inside */
+            width: 100%;
+            position: relative;
         }
 
-        /* Container for icon and title */
+        /* Icon and title container */
         .countdown-card .card-title-container {
             display: flex;
-            align-items: center; /* Vertically align icon and text */
-            justify-content: center; /* Center content horizontally */
+            align-items: center;
+            justify-content: center;
             margin-bottom: 0.5rem;
             text-align: center;
-            word-break: break-word; /* Prevent long titles from overflowing */
-            padding-right: 1.5rem; /* Add padding to prevent overlap with delete button */
+            word-break: break-word;
+            padding-right: 1.5rem; /* Space for delete button */
         }
-        /* Icon styling within the card */
         .countdown-card .event-icon {
-            font-size: 1.25rem; /* Icon size */
-            margin-right: 0.5rem; /* Space between icon and title */
-            flex-shrink: 0; /* Prevent icon from shrinking */
+            font-size: 1.25rem;
+            margin-right: 0.5rem;
+            flex-shrink: 0;
         }
-        /* Title styling */
         .countdown-card .card-title {
-            font-size: 1.125rem; /* ~18px */
-            font-weight: 600; /* Semi-bold */
-            color: #1f2937; /* Dark gray text */
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
         }
-        /* Target date styling */
-         .countdown-card .card-target-date {
-             font-size: 0.875rem; /* ~14px */
-             color: #6b7280; /* Medium gray text */
+        .countdown-card .card-target-date {
+             font-size: 0.875rem;
+             color: #6b7280;
              margin-bottom: 1rem;
              text-align: center;
          }
@@ -89,290 +83,146 @@
          .recurring-indicator {
             position: absolute;
             top: 0.5rem;
-            right: 2.5rem; /* Adjust position to avoid delete button */
-            font-size: 0.75rem; /* Small icon */
-            color: #6b7280; /* Medium gray */
-            cursor: default; /* Indicate it's not clickable */
+            right: 2.5rem;
+            font-size: 0.75rem;
+            color: #6b7280;
+            cursor: default;
             z-index: 1;
          }
-         /* === STYLE FOR DELETE BUTTON ON CARD === */
+         /* Delete button on card */
          .card-delete-button {
             position: absolute;
             top: 0.3rem;
             right: 0.3rem;
             background: none;
             border: none;
-            font-size: 1.5rem; /* Make 'x' larger */
+            font-size: 1.5rem;
             font-weight: bold;
-            color: #9ca3af; /* Lighter gray */
+            color: #9ca3af;
             cursor: pointer;
-            padding: 0.2rem 0.5rem; /* Increase clickable area */
+            padding: 0.2rem 0.5rem;
             line-height: 1;
             transition: color 0.2s ease;
-            z-index: 2; /* Ensure it's above recurring indicator */
+            z-index: 2;
          }
-         .card-delete-button:hover {
-            color: #ef4444; /* Red on hover */
-         }
-         /* === END STYLE FOR DELETE BUTTON === */
+         .card-delete-button:hover { color: #ef4444; }
 
-
-        /* Layout for time units (Days, Hours, Mins, Secs) using Grid */
+        /* === UPDATED TIMER DISPLAY LAYOUT === */
+        /* Layout for time units (Days, Hours) */
         .countdown-card .timer-display {
             display: grid;
-            /* Always use 4 columns for the time units */
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.75rem; /* Gap between time boxes */
+            /* Only two columns now */
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem; /* Slightly larger gap */
             width: 100%;
-            margin-top: 1rem; /* Space above the timer */
+            margin-top: 1rem;
         }
-        /* Styling for individual time boxes (e.g., the 'Days' box) */
+        /* Styling for individual time boxes */
         .countdown-card .time-box {
-            background-color: #4A5568; /* Dark gray-blue background */
-            padding: 0.6rem 0.5rem; /* Vertical and horizontal padding */
-            border-radius: 0.375rem; /* Slightly rounded corners */
+            background-color: #4A5568;
+            padding: 1rem 0.5rem; /* Increased padding */
+            border-radius: 0.5rem; /* More rounded */
             text-align: center;
-            display: flex; /* Use flexbox for vertical centering */
+            display: flex;
             flex-direction: column;
             justify-content: center;
-            min-height: 60px; /* Ensure consistent height */
+            min-height: 80px; /* Slightly taller */
         }
-        /* Styling for the time value (the number) */
+        /* Styling for the time value (number) */
         .countdown-card .time-value {
-            font-size: 1.5rem; /* ~24px */
-            font-weight: 600; /* Semi-bold */
-            line-height: 1.2; /* Adjust line height */
-            color: white; /* White text */
+            font-weight: 700; /* Bolder */
+            line-height: 1.1;
+            color: white;
         }
-        /* Specific color for the 'Days' value */
+        /* Specific styling for DAYS value - MORE PROMINENT */
         .countdown-card .time-value.days-value {
-             color: #FBBF24; /* Amber color for days */
+             font-size: 2.5rem; /* Significantly larger font size ~40px */
+             font-weight: 800; /* Extra bold */
+             color: #FBBF24; /* Keep amber color */
         }
-        /* Styling for the time label (e.g., 'Ngày', 'Giờ') */
+        /* Specific styling for HOURS value - Smaller */
+         .countdown-card .time-value.hours-value {
+             font-size: 1.75rem; /* Smaller font size ~28px */
+             font-weight: 600; /* Semi-bold */
+         }
+
+        /* Styling for the time label ('Ngày', 'Giờ') */
         .countdown-card .time-label {
-            font-size: 0.7rem; /* ~11px */
-            color: #A0AEC0; /* Lighter gray text */
-            margin-top: 0.1rem;
-            text-transform: uppercase; /* Uppercase labels */
+            font-size: 0.75rem; /* Slightly larger label ~12px */
+            color: #A0AEC0;
+            margin-top: 0.25rem; /* More space */
+            text-transform: uppercase;
+            font-weight: 500; /* Medium weight */
         }
-         /* Styling for the 'finished' state (ONLY for non-recurring events) */
-        .countdown-card.finished:not(.recurring-active) { /* Target only finished, non-recurring */
-             opacity: 0.7; /* Slightly faded */
+        /* === END UPDATED TIMER DISPLAY LAYOUT === */
+
+         /* Styling for the 'finished' state */
+        .countdown-card.finished:not(.recurring-active) {
+             opacity: 0.7;
         }
-        /* Styling for the timer display when finished (ONLY for non-recurring events) */
+        /* Styling for the timer display when finished */
         .countdown-card.finished:not(.recurring-active) .timer-display {
-            grid-template-columns: 1fr; /* Single column */
-            font-size: 1.25rem; /* ~20px */
+            grid-template-columns: 1fr;
+            font-size: 1.25rem;
             font-weight: 600;
-            color: #16A34A; /* Green color for finished message */
+            color: #16A34A;
             padding: 1rem 0;
             text-align: center;
+            min-height: 80px; /* Match height */
+            background-color: #f0fdf4; /* Light green background when finished */
+            border-radius: 0.5rem;
         }
 
         /* Message area styling */
-        .message {
-            padding: 0.75rem 1rem;
-            border-radius: 0.375rem;
-            margin-top: 1rem;
-            margin-bottom: 1rem;
-            display: none; /* Hidden by default */
-            text-align: center;
-            width: 100%;
-            max-width: 500px; /* Limit width */
-            font-size: 0.875rem;
-        }
+        .message { padding: 0.75rem 1rem; border-radius: 0.375rem; margin: 1rem auto; display: none; text-align: center; width: 100%; max-width: 500px; font-size: 0.875rem; }
         .error-message { background-color: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; }
         .success-message { background-color: #D1FAE5; color: #047857; border: 1px solid #6EE7B7; }
         .info-message { background-color: #DBEAFE; color: #1D4ED8; border: 1px solid #93C5FD; }
 
-        /* Container for input form and saved events list */
-        #detailsContainer {
-            width: 100%;
-            max-width: 500px; /* Limit width */
-            margin-top: 1.5rem;
-            transition: opacity 0.3s ease, max-height 0.5s ease; /* Smooth transitions */
-            overflow: hidden; /* Hide content when collapsed */
-        }
-        /* Styling for hidden state */
-        #detailsContainer.hidden {
-            opacity: 0;
-            max-height: 0;
-            margin-top: 0;
-            padding: 0;
-            border: none;
-        }
+        /* Details container */
+        #detailsContainer { width: 100%; max-width: 500px; margin-top: 1.5rem; transition: opacity 0.3s ease, max-height 0.5s ease; overflow: hidden; }
+        #detailsContainer.hidden { opacity: 0; max-height: 0; margin-top: 0; padding: 0; border: none; }
 
-        /* Styling for the list of saved events */
-        #savedEventsList {
-            width: 100%;
-            background-color: white;
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 1rem;
-            max-height: 300px; /* Limit height and enable scroll */
-            overflow-y: auto; /* Add vertical scrollbar when needed */
-        }
-        /* Styling for each item in the saved list */
-        .saved-event-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid #E2E8F0; /* Separator line */
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        .saved-event-item:last-child { border-bottom: none; } /* Remove border for last item */
-        .saved-event-item:hover { background-color: #F8FAFC; } /* Hover effect */
-        /* Styling for the selected item */
-        .saved-event-item.selected {
-            background-color: #EFF6FF; /* Light blue background */
-            border-left: 4px solid #3B82F6; /* Blue left border */
-            padding-left: calc(1rem - 4px); /* Adjust padding to account for border */
-        }
-        /* Container for event info (title, date, category) */
-        .saved-event-item .event-info {
-            flex-grow: 1; /* Allow info to take available space */
-            /* margin-right: 1rem; REMOVED as delete button is gone */
-            overflow: hidden; /* Prevent long text overflow */
-        }
-        /* Container for icon and title in the list */
-        .saved-event-item .event-title-container {
-             display: flex;
-             align-items: center;
-             margin-bottom: 0.2rem; /* Space below title line */
-        }
-        /* Icon styling in the list */
-        .saved-event-item .event-icon-list {
-            font-size: 1rem; /* Icon size */
-            margin-right: 0.4rem; /* Space between icon and title */
-            flex-shrink: 0; /* Prevent icon shrinking */
-            width: 1.2em; /* Ensure consistent width even if no icon */
-            display: inline-block; /* Align properly */
-            text-align: center;
-        }
-        /* Title styling in the list */
-        .saved-event-item .event-title {
-            font-weight: 500; /* Medium weight */
-            color: #1F2937; /* Dark gray */
-            white-space: nowrap; /* Prevent title wrapping */
-            overflow: hidden;
-            text-overflow: ellipsis; /* Add ... for long titles */
-        }
-        /* Date styling in the list */
-        .saved-event-item .event-date {
-            font-size: 0.875rem; /* ~14px */
-            color: #6B7280; /* Medium gray */
-        }
-        /* Category styling in the list */
-        .saved-event-item .event-category {
-            font-size: 0.75rem; /* ~12px */
-            color: #9CA3AF; /* Lighter gray */
-            margin-top: 0.2rem;
-            font-style: italic;
-        }
-        /* Delete button styling - REMOVED from list */
-        /* .delete-button { ... } */
+        /* Saved events list */
+        #savedEventsList { width: 100%; background-color: white; border-radius: 0.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 1rem; max-height: 300px; overflow-y: auto; }
+        .saved-event-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #E2E8F0; cursor: pointer; transition: background-color 0.2s ease; }
+        .saved-event-item:last-child { border-bottom: none; }
+        .saved-event-item:hover { background-color: #F8FAFC; }
+        .saved-event-item.selected { background-color: #EFF6FF; border-left: 4px solid #3B82F6; padding-left: calc(1rem - 4px); }
+        .saved-event-item .event-info { flex-grow: 1; overflow: hidden; }
+        .saved-event-item .event-title-container { display: flex; align-items: center; margin-bottom: 0.2rem; }
+        .saved-event-item .event-icon-list { font-size: 1rem; margin-right: 0.4rem; flex-shrink: 0; width: 1.2em; display: inline-block; text-align: center; }
+        .saved-event-item .event-title { font-weight: 500; color: #1F2937; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .saved-event-item .event-date { font-size: 0.875rem; color: #6B7280; }
+        .saved-event-item .event-category { font-size: 0.75rem; color: #9CA3AF; margin-top: 0.2rem; font-style: italic; }
 
-        /* Toggle button styling */
-        #toggleDetailsButton {
-            margin-top: 0; /* Reset margin */
-            margin-bottom: 1rem;
-        }
+        /* Toggle button */
+        #toggleDetailsButton { margin-bottom: 1rem; }
 
-        /* Input form styling */
-        #inputFormContainer label { margin-bottom: 0.25rem; display: block; /* Ensure label is block */ }
-        #inputFormContainer .mb-4 { margin-bottom: 1rem; } /* Consistent spacing */
-        #inputFormContainer textarea { resize: vertical; /* Allow vertical resize only */ }
-        #inputFormContainer input, #inputFormContainer textarea, #inputFormContainer select { /* Include select */
-             border-color: #D1D5DB; /* Default border color */
-        }
-        #inputFormContainer input:focus, #inputFormContainer textarea:focus, #inputFormContainer select:focus {
-             border-color: #3B82F6; /* Blue border on focus */
-             box-shadow: 0 0 0 1px #3B82F6; /* Blue ring on focus */
-             outline: none; /* Remove default outline */
-        }
-        /* Checkbox styling */
-        #inputFormContainer .checkbox-label {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            font-size: 0.875rem;
-            color: #374151;
-        }
-        #inputFormContainer input[type="checkbox"] {
-            height: 1rem;
-            width: 1rem;
-            margin-right: 0.5rem;
-            border-radius: 0.25rem;
-            border-color: #D1D5DB;
-            color: #3B82F6; /* Checkmark color */
-            cursor: pointer;
-        }
-        #inputFormContainer input[type="checkbox"]:focus {
-            ring: 2px;
-            ring-offset: 2px;
-             --tw-ring-offset-color: #fff;
-             --tw-ring-color: #60A5FA;
-             box-shadow: none; /* Remove default browser focus */
-             border-color: #3B82F6;
-        }
+        /* Input form */
+        #inputFormContainer label { margin-bottom: 0.25rem; display: block; }
+        #inputFormContainer .mb-4 { margin-bottom: 1rem; }
+        #inputFormContainer textarea { resize: vertical; }
+        #inputFormContainer input, #inputFormContainer textarea, #inputFormContainer select { border-color: #D1D5DB; }
+        #inputFormContainer input:focus, #inputFormContainer textarea:focus, #inputFormContainer select:focus { border-color: #3B82F6; box-shadow: 0 0 0 1px #3B82F6; outline: none; }
+        #inputFormContainer .checkbox-label { display: flex; align-items: center; cursor: pointer; font-size: 0.875rem; color: #374151; }
+        #inputFormContainer input[type="checkbox"] { height: 1rem; width: 1rem; margin-right: 0.5rem; border-radius: 0.25rem; border-color: #D1D5DB; color: #3B82F6; cursor: pointer; }
+        #inputFormContainer input[type="checkbox"]:focus { ring: 2px; ring-offset: 2px; --tw-ring-offset-color: #fff; --tw-ring-color: #60A5FA; box-shadow: none; border-color: #3B82F6; }
 
+        /* Form buttons */
+        .form-button-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin-top: 1.5rem; }
+        .form-button { padding: 0.6rem 1rem; font-weight: 600; border-radius: 0.375rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: all 0.2s ease-in-out; text-align: center; cursor: pointer; border: 1px solid transparent; }
+        .form-button:focus { outline: none; --tw-ring-offset-width: 2px; --tw-ring-offset-color: #fff; --tw-ring-color: var(--focus-ring-color, #93C5FD); --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color); box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000); }
+        #startButton { background-color: #3B82F6; color: white; --focus-ring-color: #60A5FA; } #startButton:hover { background-color: #2563EB; }
+        #saveButton { background-color: #10B981; color: white; --focus-ring-color: #34D399; } #saveButton:hover { background-color: #059669; }
+        #newButton { background-color: #F97316; color: white; --focus-ring-color: #FB923C; } #newButton:hover { background-color: #EA580C; }
 
-        /* Button group styling */
-        .form-button-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsive columns */
-            gap: 0.75rem; /* Gap between buttons */
-            margin-top: 1.5rem; /* Space above button group */
-        }
-        /* General button styling */
-        .form-button {
-            padding: 0.6rem 1rem; /* Slightly larger padding */
-            font-weight: 600; /* Semi-bold */
-            border-radius: 0.375rem;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            transition: all 0.2s ease-in-out;
-            text-align: center;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-        .form-button:focus {
-            outline: none;
-            /* Tailwind focus ring */
-            --tw-ring-offset-width: 2px;
-            --tw-ring-offset-color: #fff;
-            --tw-ring-color: var(--focus-ring-color, #93C5FD); /* Default blue, can be overridden */
-            --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-            box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
-        }
-        /* Specific button styles */
-        #startButton { background-color: #3B82F6; color: white; --focus-ring-color: #60A5FA; }
-        #startButton:hover { background-color: #2563EB; }
-
-        #saveButton { background-color: #10B981; color: white; --focus-ring-color: #34D399; }
-        #saveButton:hover { background-color: #059669; }
-
-        #newButton { background-color: #F97316; color: white; --focus-ring-color: #FB923C; }
-        #newButton:hover { background-color: #EA580C; }
-
-        /* Responsive adjustments for time display within cards */
-        @media (max-width: 420px) { /* Smaller mobile screens */
-            .countdown-card .timer-display {
-                grid-template-columns: repeat(2, 1fr); /* Force 2 columns */
-                gap: 0.5rem; /* Reduce gap */
-            }
-             .countdown-card .time-value {
-                 font-size: 1.25rem; /* Slightly smaller font */
-             }
-             .countdown-card .time-label {
-                 font-size: 0.65rem; /* Slightly smaller font */
-             }
-             .countdown-card .time-box {
-                 min-height: 50px; /* Reduce min height */
-                 padding: 0.5rem 0.4rem;
-             }
+        /* Responsive adjustments for time display */
+        @media (max-width: 420px) {
+            .countdown-card .time-value.days-value { font-size: 2rem; } /* Slightly smaller on very small screens */
+            .countdown-card .time-value.hours-value { font-size: 1.5rem; }
+            .countdown-card .time-label { font-size: 0.7rem; }
+            .countdown-card .time-box { min-height: 70px; padding: 0.75rem 0.4rem; }
         }
 
     </style>
@@ -380,7 +230,7 @@
 <body class="bg-gray-100">
 
     <div class="main-container">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6 text-center">Bảng Điều Khiển Đếm Ngược</h1>
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6 text-center">Đếm Ngược Tới Ngày:</h1>
 
         <div id="multipleCountdownsContainer">
             <p id="noActiveCountdowns">Không có sự kiện nào đang đếm ngược. Hãy thêm một sự kiện mới!</p>
@@ -582,7 +432,7 @@
 
             cardElement.classList.toggle('recurring-active', eventData.isRecurring);
 
-            // === ADD DELETE BUTTON TO CARD HTML ===
+            // === UPDATED CARD HTML (Days/Hours only) ===
             cardElement.innerHTML = `
                 ${eventData.isRecurring ? '<span class="recurring-indicator" title="Sự kiện lặp lại hàng năm">🔁</span>' : ''}
                 <button class="card-delete-button" data-id="${eventData.id}" aria-label="Xóa sự kiện này">&times;</button>
@@ -594,43 +444,32 @@
                 <div class="timer-display">
                     ${isEffectivelyFinished ? 'Đã đến giờ!' : `
                         <div class="time-box"><div class="time-value days-value" data-unit="days">0</div><div class="time-label">Ngày</div></div>
-                        <div class="time-box"><div class="time-value" data-unit="hours">0</div><div class="time-label">Giờ</div></div>
-                        <div class="time-box"><div class="time-value" data-unit="minutes">0</div><div class="time-label">Phút</div></div>
-                        <div class="time-box"><div class="time-value" data-unit="seconds">0</div><div class="time-label">Giây</div></div>
-                    `}
+                        <div class="time-box"><div class="time-value hours-value" data-unit="hours">0</div><div class="time-label">Giờ</div></div>
+                        `}
                 </div>
             `;
-            // === END ADD DELETE BUTTON ===
+            // === END UPDATED CARD HTML ===
 
             timerDisplayElement = cardElement.querySelector('.timer-display');
 
-            // === ADD EVENT LISTENER FOR CARD DELETE BUTTON ===
+            // Add event listener for the delete button on the card
             const deleteBtn = cardElement.querySelector('.card-delete-button');
             if (deleteBtn) {
                 deleteBtn.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent triggering other card clicks if any
+                    e.stopPropagation();
                     const eventIdStr = e.currentTarget.dataset.id;
                     const eventId = parseInt(eventIdStr);
                     const currentEvent = savedEvents.find(ev => ev.id === eventId);
                     const eventTitle = currentEvent ? (currentEvent.title || 'Không có tiêu đề') : 'sự kiện này';
 
-                    console.log(`Card delete button clicked for ID: ${eventId}`);
                     if (window.confirm(`Bạn có chắc chắn muốn xóa sự kiện "${eventTitle}" không?`)) {
-                         console.log(`Confirmed card deletion for ID: ${eventId}`);
-                         if (!isNaN(eventId)) {
-                             deleteEvent(eventId); // Call the main delete function
-                         } else {
-                             console.error("Invalid ID from card delete button:", eventIdStr);
-                             showMessage("Lỗi: Không thể xác định sự kiện để xóa.", "error");
-                         }
-                    } else {
-                         console.log(`Cancelled card deletion for ID: ${eventId}`);
+                         if (!isNaN(eventId)) { deleteEvent(eventId); }
+                         else { console.error("Invalid ID from card delete button:", eventIdStr); showMessage("Lỗi: Không thể xác định sự kiện để xóa.", "error"); }
                     }
                 });
             }
-            // === END ADD EVENT LISTENER ===
 
-
+            // Handle finished state or start/update timer
             if (isEffectivelyFinished) {
                 cardElement.classList.add('finished');
                  if (timerDisplayElement) timerDisplayElement.style.gridTemplateColumns = '1fr';
@@ -638,7 +477,7 @@
             } else {
                 cardElement.classList.remove('finished');
                  if (timerDisplayElement) {
-                      timerDisplayElement.style.gridTemplateColumns = ''; // Reset grid
+                      timerDisplayElement.style.gridTemplateColumns = ''; // Reset grid (uses CSS default: 2 columns)
                       updateSingleCountdownTime(eventData.id, timerDisplayElement);
                       startCountdownInterval(eventData.id, timerDisplayElement);
                  }
@@ -647,7 +486,7 @@
         }
 
         /**
-         * Updates the time display for a countdown, handles recurrence.
+         * Updates the time display (Days/Hours) for a countdown, handles recurrence.
          * @param {number} eventId - Event ID.
          * @param {HTMLElement} timerDisplayElement - Timer display container.
          */
@@ -656,10 +495,8 @@
             if (eventIndex === -1) { stopCountdownInterval(eventId); removeCountdownCard(eventId); return; }
             const eventData = savedEvents[eventIndex];
 
-            // Ensure the timer element is still part of the DOM for this card ID
             if (!timerDisplayElement || !timerDisplayElement.closest(`#countdown-${eventId}`)) {
-                stopCountdownInterval(eventId);
-                return;
+                stopCountdownInterval(eventId); return;
             }
 
             const targetTime = new Date(eventData.date).getTime();
@@ -667,38 +504,31 @@
             let distance = targetTime - now;
 
             if (distance < 0) {
-                stopCountdownInterval(eventId); // Stop interval regardless of recurrence
-                if (eventData.isRecurring) {
-                    handleRecurringEvent(eventData); // Handle the recurrence logic
-                    return; // Exit after handling recurrence
-                } else {
-                    // Handle non-recurring finished event
+                stopCountdownInterval(eventId);
+                if (eventData.isRecurring) { handleRecurringEvent(eventData); return; }
+                else {
                     const card = timerDisplayElement.closest('.countdown-card');
                     if (card && !card.classList.contains('finished')) {
                         timerDisplayElement.innerHTML = 'Đã đến giờ!';
                         card.classList.add('finished');
                         timerDisplayElement.style.gridTemplateColumns = '1fr';
                     }
-                    return; // Stop updates for finished non-recurring event
+                    return;
                 }
             }
 
-            // Update time display if still active
+            // Calculate only days and hours
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            // Minutes and seconds are no longer needed
 
             const daysEl = timerDisplayElement.querySelector('[data-unit="days"]');
             const hoursEl = timerDisplayElement.querySelector('[data-unit="hours"]');
-            const minutesEl = timerDisplayElement.querySelector('[data-unit="minutes"]');
-            const secondsEl = timerDisplayElement.querySelector('[data-unit="seconds"]');
+            // Remove references to minutes and seconds elements
 
-            // Only update if value changed
+            // Update only days and hours
             if (daysEl && daysEl.textContent != days) daysEl.textContent = days;
             if (hoursEl && hoursEl.textContent != hours) hoursEl.textContent = hours;
-            if (minutesEl && minutesEl.textContent != minutes) minutesEl.textContent = minutes;
-            if (secondsEl && secondsEl.textContent != seconds) secondsEl.textContent = seconds;
         }
 
         /**
@@ -707,78 +537,50 @@
          */
         function handleRecurringEvent(eventData) {
              console.log(`Handling recurring event: ${eventData.title}`);
-             // Use originalDate if available, otherwise fallback to the current date
              const baseDateStr = eventData.originalDate || eventData.date;
              let nextOccurrence = new Date(baseDateStr);
 
-             // Validate the base date
              if (isNaN(nextOccurrence.getTime())) {
                  console.error(`Invalid base date ("${baseDateStr}") for recurring event: ${eventData.title}`);
-                 // Prevent infinite loops: Mark as non-recurring and finished
                  const eventIndex = savedEvents.findIndex(e => e.id === eventData.id);
-                 if (eventIndex > -1) {
-                     savedEvents[eventIndex].isRecurring = false;
-                     saveEvents();
-                     renderOrUpdateCountdownCard(savedEvents[eventIndex]); // Re-render as finished non-recurring
-                 }
+                 if (eventIndex > -1) { savedEvents[eventIndex].isRecurring = false; saveEvents(); renderOrUpdateCountdownCard(savedEvents[eventIndex]); }
                  return;
              }
 
              const now = new Date().getTime();
              let yearsToAdd = 1;
-             let safetyCounter = 0; // Prevent infinite loops
+             let safetyCounter = 0;
 
-             // Calculate the next occurrence date that is in the future
              while (safetyCounter < 100) {
-                // Create a new date object based on the original date each time
                 let potentialNext = new Date(baseDateStr);
-                // Add years to the original date
                 potentialNext.setFullYear(potentialNext.getFullYear() + yearsToAdd);
-
-                 // Check if this potential date is in the future
-                 if (potentialNext.getTime() > now) {
-                     nextOccurrence = potentialNext; // Found the next valid date
-                     break;
-                 }
-                 yearsToAdd++;
-                 safetyCounter++;
+                 if (potentialNext.getTime() > now) { nextOccurrence = potentialNext; break; }
+                 yearsToAdd++; safetyCounter++;
              }
 
-             // Handle case where no future date is found within the limit
              if (safetyCounter >= 100) {
-                 console.error(`Could not find a future occurrence within 100 years for: ${eventData.title}`);
+                 console.error(`Could not find future occurrence for: ${eventData.title}`);
                  const eventIndex = savedEvents.findIndex(e => e.id === eventData.id);
-                  if (eventIndex > -1) { // Mark as non-recurring
-                      savedEvents[eventIndex].isRecurring = false;
-                      saveEvents();
-                      renderOrUpdateCountdownCard(savedEvents[eventIndex]);
-                  }
+                  if (eventIndex > -1) { savedEvents[eventIndex].isRecurring = false; saveEvents(); renderOrUpdateCountdownCard(savedEvents[eventIndex]); }
                  return;
              }
 
-             // Update the event in the savedEvents array
              const eventIndex = savedEvents.findIndex(e => e.id === eventData.id);
              if (eventIndex > -1) {
-                 // Format the calculated next occurrence date back into YYYY-MM-DDTHH:mm string
                  const year = nextOccurrence.getFullYear();
                  const month = String(nextOccurrence.getMonth() + 1).padStart(2, '0');
                  const day = String(nextOccurrence.getDate()).padStart(2, '0');
                  const hours = String(nextOccurrence.getHours()).padStart(2, '0');
                  const minutes = String(nextOccurrence.getMinutes()).padStart(2, '0');
                  const nextDateString = `${year}-${month}-${day}T${hours}:${minutes}`;
-
-                 savedEvents[eventIndex].date = nextDateString; // Update the date
-
+                 savedEvents[eventIndex].date = nextDateString;
                  console.log(`Event "${eventData.title}" updated to next occurrence: ${nextDateString}`);
-
-                 saveEvents(); // Save the updated list to localStorage
-                 // Re-render the specific card to reflect the new date and restart the timer
-                 renderOrUpdateCountdownCard(savedEvents[eventIndex]);
+                 saveEvents();
+                 renderOrUpdateCountdownCard(savedEvents[eventIndex]); // Re-render to restart timer
              } else {
-                 console.error(`Could not find event ${eventData.id} in array to update recurrence.`);
+                 console.error(`Could not find event ${eventData.id} to update recurrence.`);
              }
         }
-
 
         /**
          * Starts the interval timer for a countdown.
@@ -786,23 +588,15 @@
          * @param {HTMLElement} timerDisplayElement - The timer display container.
          */
         function startCountdownInterval(eventId, timerDisplayElement) {
-            stopCountdownInterval(eventId); // Clear existing interval first
+            stopCountdownInterval(eventId);
             const card = timerDisplayElement?.closest('.countdown-card');
-            // Do not start if card doesn't exist or is marked as finished (non-recurring)
-            if (!card || card.classList.contains('finished')) {
-                 return;
-            }
-            // Create new interval
+            if (!card || card.classList.contains('finished')) { return; }
             if (!countdownIntervals[eventId]) {
                  countdownIntervals[eventId] = setInterval(() => {
-                     // Re-fetch the element inside interval for safety
                      const currentTimerDisplay = document.getElementById(`countdown-${eventId}`)?.querySelector('.timer-display');
-                     if (currentTimerDisplay) {
-                        updateSingleCountdownTime(eventId, currentTimerDisplay);
-                     } else {
-                         stopCountdownInterval(eventId); // Stop if element is gone
-                     }
-                 }, 1000);
+                     if (currentTimerDisplay) { updateSingleCountdownTime(eventId, currentTimerDisplay); }
+                     else { stopCountdownInterval(eventId); }
+                 }, 1000); // Still check every second for hour changes or recurrence
             }
         }
 
@@ -811,10 +605,7 @@
          * @param {number} eventId - The event ID.
          */
         function stopCountdownInterval(eventId) {
-            if (countdownIntervals[eventId]) {
-                clearInterval(countdownIntervals[eventId]);
-                delete countdownIntervals[eventId];
-            }
+            if (countdownIntervals[eventId]) { clearInterval(countdownIntervals[eventId]); delete countdownIntervals[eventId]; }
         }
 
         /**
@@ -823,10 +614,8 @@
          */
         function removeCountdownCard(eventId) {
             const card = document.getElementById(`countdown-${eventId}`);
-            if (card) {
-                card.remove();
-            }
-            checkIfNoCountdowns(); // Update placeholder visibility
+            if (card) { card.remove(); }
+            checkIfNoCountdowns();
         }
 
         /**
@@ -843,13 +632,9 @@
          * Renders all active countdowns.
          */
         function renderAllActiveCountdowns() {
-            // Clear existing cards before rendering
             multipleCountdownsContainer.querySelectorAll('.countdown-card').forEach(card => card.remove());
-            // Render each event
-            savedEvents.forEach(event => {
-                 renderOrUpdateCountdownCard(event);
-            });
-            checkIfNoCountdowns(); // Check placeholder visibility after rendering
+            savedEvents.forEach(event => { renderOrUpdateCountdownCard(event); });
+            checkIfNoCountdowns();
         }
 
         // --- Local Storage & Event Management ---
@@ -863,24 +648,12 @@
             try {
                 parsedEvents = storedEvents ? JSON.parse(storedEvents) : [];
                  if (!Array.isArray(parsedEvents)) { parsedEvents = []; }
-
-                 // Data Migration: Ensure all events have required fields
                  savedEvents = parsedEvents.map(event => ({
-                     id: event.id,
-                     title: event.title || 'Sự kiện không tên',
-                     date: event.date,
-                     icon: event.icon || '',
-                     notes: event.notes || '',
-                     category: event.category || '',
-                     isRecurring: event.isRecurring || false,
-                     originalDate: event.originalDate || null
+                     id: event.id, title: event.title || 'Sự kiện không tên', date: event.date,
+                     icon: event.icon || '', notes: event.notes || '', category: event.category || '',
+                     isRecurring: event.isRecurring || false, originalDate: event.originalDate || null
                  }));
-
-            } catch (e) {
-                console.error("Error parsing saved events:", e);
-                savedEvents = [];
-                showMessage("Lỗi khi tải sự kiện đã lưu.", "error");
-            }
+            } catch (e) { console.error("Error parsing saved events:", e); savedEvents = []; showMessage("Lỗi khi tải sự kiện đã lưu.", "error"); }
             renderSavedEventsList();
             renderAllActiveCountdowns();
         }
@@ -890,15 +663,9 @@
          */
         function saveEvents() {
              try {
-                 // Map to ensure correct structure is saved
                  const eventsToSave = savedEvents.map(event => ({
-                     id: event.id,
-                     title: event.title,
-                     date: event.date,
-                     icon: event.icon,
-                     notes: event.notes,
-                     category: event.category,
-                     isRecurring: event.isRecurring,
+                     id: event.id, title: event.title, date: event.date, icon: event.icon,
+                     notes: event.notes, category: event.category, isRecurring: event.isRecurring,
                      originalDate: event.originalDate
                  }));
                 localStorage.setItem('countdownEvents', JSON.stringify(eventsToSave));
@@ -916,24 +683,19 @@
             savedEventsList.innerHTML = '';
             const placeholder = noEventsMessage.cloneNode(true);
             savedEventsList.appendChild(placeholder);
-
             if (savedEvents.length === 0) { placeholder.style.display = 'block'; return; }
             placeholder.style.display = 'none';
 
-            // Sort events by date (nearest first)
             const sortedEvents = [...savedEvents].sort((a, b) => {
                 const dateA = new Date(a.date).getTime(); const dateB = new Date(b.date).getTime();
                  if (isNaN(dateA)) return 1; if (isNaN(dateB)) return -1; return dateA - dateB;
             });
 
-            // Create list items
             sortedEvents.forEach(event => {
                 const item = document.createElement('div');
                 item.className = 'saved-event-item';
-                item.dataset.id = event.id; // Set dataset ID here
+                item.dataset.id = event.id;
                 const recurringIndicator = event.isRecurring ? '<span title="Lặp lại hàng năm"> 🔁</span>' : '';
-
-                // === REMOVE DELETE BUTTON FROM LIST ITEM HTML ===
                 item.innerHTML = `
                     <div class="event-info">
                         <div class="event-title-container">
@@ -942,18 +704,8 @@
                          </div>
                         <div class="event-date">${formatDisplayDate(event.date)}</div>
                          ${event.category ? `<div class="event-category">Danh mục: ${event.category}</div>` : ''}
-                    </div>
-                    `;
-                // === END REMOVE DELETE BUTTON ===
-
-
+                    </div>`; // Delete button removed from here
                 item.querySelector('.event-info').addEventListener('click', () => loadEventIntoForm(event.id));
-
-                // === REMOVE DELETE BUTTON EVENT LISTENER ===
-                // const deleteButton = item.querySelector('.delete-button');
-                // if (deleteButton) { ... } // Listener removed
-                // === END REMOVE LISTENER ===
-
                 savedEventsList.appendChild(item);
             });
         }
@@ -964,117 +716,54 @@
          */
         function deleteEvent(id) {
              console.log(`deleteEvent function called with ID: ${id}`);
-
-             // Ensure id is a valid number before proceeding
-             if (typeof id !== 'number' || isNaN(id)) {
-                 console.error("deleteEvent called with invalid ID:", id);
-                 showMessage("Lỗi: ID sự kiện không hợp lệ để xóa.", "error");
-                 return;
-             }
-
+             if (typeof id !== 'number' || isNaN(id)) { console.error("deleteEvent invalid ID:", id); showMessage("Lỗi: ID sự kiện không hợp lệ.", "error"); return; }
              const eventIndex = savedEvents.findIndex(e => e.id === id);
-             if (eventIndex === -1) {
-                 console.warn(`Event with ID ${id} not found in savedEvents array.`);
-                 // Don't show error message here as it might be redundant if card was already gone
-                 return;
-             }
+             if (eventIndex === -1) { console.warn(`Event ID ${id} not found for deletion.`); return; }
              const eventToDelete = savedEvents[eventIndex];
              const eventTitle = eventToDelete.title || "Không có tiêu đề";
-
-             console.log(`Attempting to delete: ID=${id}, Title=${eventTitle}`);
-
-             // 1. Stop timer
-             console.log(`Stopping interval for ${id}`);
+             console.log(`Attempting delete: ID=${id}, Title=${eventTitle}`);
              stopCountdownInterval(id);
-
-             // 2. Remove UI card
-             console.log(`Removing card for ${id}`);
-             removeCountdownCard(id); // This function now handles the card removal
-
-             // 3. Remove from array
-             const originalLength = savedEvents.length;
+             removeCountdownCard(id);
              savedEvents = savedEvents.filter(event => event.id !== id);
-             console.log(`Array filtered. Original length: ${originalLength}, New length: ${savedEvents.length}`);
-
-             // 4. Save changes
-             console.log(`Saving events after deletion`);
              saveEvents();
-
-             // 5. Update management list (which no longer shows delete buttons)
-             console.log(`Rendering saved events list after deletion`);
              renderSavedEventsList();
-
-             // 6. Clear form if editing deleted event
-             if (editingEventIdInput.value == id) { // Compare value with the number ID
-                  console.log(`Clearing edit selection as deleted event ${id} was being edited.`);
-                  clearEditSelection();
-             }
-
-             // 7. Show success message
+             if (editingEventIdInput.value == id) { clearEditSelection(); }
              showMessage(`Đã xóa sự kiện "${eventTitle}".`, 'success');
         }
 
         /**
          * Adds or updates an event based on form data.
-         * @param {object} eventData - Placeholder (data read from form).
-         * @param {boolean} isNew - True if adding a new event.
-         * @returns {boolean} True on success, false on validation failure.
+         * @param {object} eventData - Placeholder.
+         * @param {boolean} isNew - True if adding new.
+         * @returns {boolean} True on success.
          */
         function addOrUpdateEvent(eventData = {}, isNew) {
             const id = isNew ? Date.now() : parseInt(editingEventIdInput.value);
             const dateValue = eventDateInput.value;
             const isRecurringValue = eventRecurringInput.checked;
-
-            // --- Validation ---
-            if (!eventTitleInput.value.trim() || !dateValue) {
-                showMessage("Lỗi: Tên sự kiện và Ngày giờ là bắt buộc.", 'error'); return false;
-            }
+            if (!eventTitleInput.value.trim() || !dateValue) { showMessage("Lỗi: Tên sự kiện và Ngày giờ là bắt buộc.", 'error'); return false; }
             const targetTime = new Date(dateValue).getTime();
-             if (isNaN(targetTime)) {
-                 showMessage("Lỗi: Ngày giờ không hợp lệ.", 'error'); return false;
-             }
-             // Prevent saving new past events unless recurring
-             if (isNew && targetTime < new Date().getTime() && !isRecurringValue) {
-                  showMessage("Không thể lưu sự kiện mới trong quá khứ (trừ khi lặp lại).", 'error'); return false;
-             }
-             // --- End Validation ---
+             if (isNaN(targetTime)) { showMessage("Lỗi: Ngày giờ không hợp lệ.", 'error'); return false; }
+             if (isNew && targetTime < new Date().getTime() && !isRecurringValue) { showMessage("Không thể lưu sự kiện mới trong quá khứ (trừ khi lặp lại).", 'error'); return false; }
 
-             // Determine originalDate for recurring events
              let originalDateValue = null;
              if (isRecurringValue) {
-                 if (isNew) { originalDateValue = dateValue; } // Set for new recurring
-                 else { // Keep existing or set if just turned recurring
-                     const existingEvent = savedEvents.find(e => e.id == id);
-                     originalDateValue = existingEvent?.originalDate || dateValue;
-                 }
+                 if (isNew) { originalDateValue = dateValue; }
+                 else { const existingEvent = savedEvents.find(e => e.id == id); originalDateValue = existingEvent?.originalDate || dateValue; }
              }
-
-            // Prepare data object
             const dataToSave = {
-                id: id,
-                title: eventTitleInput.value.trim() || "Sự kiện không tên",
-                date: dateValue,
-                icon: eventIconInput.value.trim(),
-                notes: eventNotesInput.value.trim(),
-                category: eventCategoryInput.value.trim(),
-                isRecurring: isRecurringValue,
-                originalDate: originalDateValue
+                id: id, title: eventTitleInput.value.trim() || "Sự kiện không tên", date: dateValue,
+                icon: eventIconInput.value.trim(), notes: eventNotesInput.value.trim(), category: eventCategoryInput.value.trim(),
+                isRecurring: isRecurringValue, originalDate: originalDateValue
             };
-
-            // Add or Update in the array
             if (isNew) { savedEvents.push(dataToSave); }
             else {
                 const index = savedEvents.findIndex(e => e.id == dataToSave.id);
                 if (index > -1) { savedEvents[index] = dataToSave; }
                 else { console.error("Update failed: ID not found", dataToSave.id); showMessage("Lỗi: Không tìm thấy sự kiện.", 'error'); return false; }
             }
-
-            // Save, Update UI, Clear Form
-            saveEvents();
-            renderSavedEventsList();
-            renderOrUpdateCountdownCard(dataToSave); // Render the updated/new card
-            clearEditSelection();
-            return true; // Indicate success
+            saveEvents(); renderSavedEventsList(); renderOrUpdateCountdownCard(dataToSave); clearEditSelection();
+            return true;
         }
 
         /**
@@ -1084,98 +773,37 @@
         function loadEventIntoForm(id) {
             const event = savedEvents.find(e => e.id === id);
             if (!event) { showMessage("Không tìm thấy sự kiện.", "error"); return; }
-
-            // Populate form fields
-            formTitle.textContent = "Chỉnh sửa sự kiện";
-            editingEventIdInput.value = event.id;
-            eventTitleInput.value = event.title;
-            try { // Format date robustly
-                const dateForInput = new Date(event.date);
-                 if (isNaN(dateForInput.getTime())) throw new Error("Invalid date");
-                const timezoneOffset = dateForInput.getTimezoneOffset() * 60000;
-                const localISOTime = new Date(dateForInput.getTime() - timezoneOffset).toISOString().slice(0, 16);
-                eventDateInput.value = localISOTime;
-            } catch (e) { eventDateInput.value = ''; console.error("Date format error:", e); }
-            eventIconInput.value = event.icon || '';
-            eventNotesInput.value = event.notes || '';
-            eventCategoryInput.value = event.category || '';
-            eventRecurringInput.checked = event.isRecurring || false; // Set checkbox state
-
-            // Highlight selected item
-            document.querySelectorAll('.saved-event-item').forEach(item => item.classList.remove('selected'));
-            const selectedItem = document.querySelector(`.saved-event-item[data-id="${id}"]`);
-            if(selectedItem) { selectedItem.classList.add('selected'); selectedItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
-
-            // Show form and adjust buttons
+            formTitle.textContent = "Chỉnh sửa sự kiện"; editingEventIdInput.value = event.id; eventTitleInput.value = event.title;
+            try { const d = new Date(event.date); if (isNaN(d.getTime())) throw Error(); const off = d.getTimezoneOffset()*60000; eventDateInput.value = new Date(d.getTime()-off).toISOString().slice(0,16); }
+            catch (e) { eventDateInput.value = ''; console.error("Date format error:", e); }
+            eventIconInput.value = event.icon || ''; eventNotesInput.value = event.notes || ''; eventCategoryInput.value = event.category || '';
+            eventRecurringInput.checked = event.isRecurring || false;
+            document.querySelectorAll('.saved-event-item').forEach(i => i.classList.remove('selected'));
+            const item = document.querySelector(`.saved-event-item[data-id="${id}"]`); if(item) { item.classList.add('selected'); item.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
             if (!detailsVisible) { toggleDetailsVisibility(true); }
-             startButton.style.display = 'block';
-             saveButton.style.display = 'none';
-             newButton.textContent = 'Hủy chỉnh sửa';
-             eventTitleInput.focus();
+             startButton.style.display = 'block'; saveButton.style.display = 'none'; newButton.textContent = 'Hủy chỉnh sửa'; eventTitleInput.focus();
         }
 
-        /**
-         * Clears the form and resets to "Add New" state.
-         */
+        /** Clears the form and resets to "Add New" state. */
         function clearEditSelection() {
-            formTitle.textContent = "Thêm sự kiện mới";
-            editingEventIdInput.value = '';
-            eventTitleInput.value = '';
-            eventDateInput.value = getDefaultDateTime();
-            eventIconInput.value = '';
-            eventNotesInput.value = '';
-            eventCategoryInput.value = '';
-            eventRecurringInput.checked = false; // Uncheck recurring box
-            document.querySelectorAll('.saved-event-item').forEach(item => item.classList.remove('selected'));
-             startButton.style.display = 'none';
-             saveButton.style.display = 'block';
-             newButton.textContent = 'Hủy / Tạo mới';
+            formTitle.textContent = "Thêm sự kiện mới"; editingEventIdInput.value = ''; eventTitleInput.value = '';
+            eventDateInput.value = getDefaultDateTime(); eventIconInput.value = ''; eventNotesInput.value = ''; eventCategoryInput.value = '';
+            eventRecurringInput.checked = false;
+            document.querySelectorAll('.saved-event-item').forEach(i => i.classList.remove('selected'));
+             startButton.style.display = 'none'; saveButton.style.display = 'block'; newButton.textContent = 'Hủy / Tạo mới';
         }
 
         // --- Event Listeners Setup ---
-        startButton.addEventListener('click', () => { // Update button
-            const id = parseInt(editingEventIdInput.value);
-            if (!id || isNaN(id)) { showMessage("Vui lòng chọn sự kiện để cập nhật.", 'info'); return; }
-            const success = addOrUpdateEvent({}, false);
-            if (success) { showMessage(`Đã cập nhật sự kiện "${eventTitleInput.value.trim() || 'Không có tiêu đề'}".`, 'success'); }
-        });
-
-        saveButton.addEventListener('click', () => { // Save New button
-            const success = addOrUpdateEvent({}, true);
-            if (success) { showMessage(`Đã lưu sự kiện mới "${eventTitleInput.value.trim() || 'Không có tiêu đề'}".`, 'success'); }
-        });
-
-        newButton.addEventListener('click', () => { // Cancel/New button
-             const wasEditing = !!editingEventIdInput.value;
-            clearEditSelection();
-            showMessage(wasEditing ? "Đã hủy chỉnh sửa." : "Đã xóa form.", 'info');
-        });
-
-        toggleDetailsButton.addEventListener('click', () => { // Toggle details view
-            toggleDetailsVisibility();
-        });
+        startButton.addEventListener('click', () => { const id = parseInt(editingEventIdInput.value); if (!id||isNaN(id)) { showMessage("Vui lòng chọn sự kiện.",'info'); return; } if(addOrUpdateEvent({},false)) showMessage(`Đã cập nhật "${eventTitleInput.value.trim()||'Không tên'}".`,'success'); });
+        saveButton.addEventListener('click', () => { if(addOrUpdateEvent({},true)) showMessage(`Đã lưu "${eventTitleInput.value.trim()||'Không tên'}".`,'success'); });
+        newButton.addEventListener('click', () => { const wasEditing=!!editingEventIdInput.value; clearEditSelection(); showMessage(wasEditing?"Đã hủy chỉnh sửa.":"Đã xóa form.",'info'); });
+        toggleDetailsButton.addEventListener('click', () => toggleDetailsVisibility());
 
         // --- Initialization ---
         window.addEventListener('load', () => {
-             loadEvents(); // Load existing events
-             clearEditSelection(); // Prepare form for new entry
-             startButton.style.display = 'none'; // Hide update button initially
-             checkIfNoCountdowns(); // Set initial placeholder visibility
-
-             // Initial check for passed recurring events on load
-             savedEvents.forEach(event => {
-                 if (event.isRecurring) {
-                     const targetTime = new Date(event.date).getTime();
-                     // Check if the saved date is valid and in the past
-                     if (!isNaN(targetTime) && targetTime < new Date().getTime()) {
-                         console.log(`Initial check: Handling passed recurring event: ${event.title}`);
-                         handleRecurringEvent(event); // Update date if necessary
-                     }
-                 }
-             });
-             // Re-render list and cards after potential initial updates
-             renderSavedEventsList();
-             renderAllActiveCountdowns();
+             loadEvents(); clearEditSelection(); startButton.style.display = 'none'; checkIfNoCountdowns();
+             savedEvents.forEach(event => { if (event.isRecurring) { const t = new Date(event.date).getTime(); if (!isNaN(t) && t < Date.now()) { console.log(`Initial check: Handling passed recurring: ${event.title}`); handleRecurringEvent(event); } } });
+             renderSavedEventsList(); renderAllActiveCountdowns(); // Re-render after initial checks
         });
 
     </script>
