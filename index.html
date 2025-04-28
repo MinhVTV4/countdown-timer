@@ -9,121 +9,371 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Apply Inter font to the body */
         body {
             font-family: 'Inter', sans-serif;
         }
+        /* Main container styling */
         .main-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            padding: 2rem 1rem;
-            background-color: #f7fafc;
+            padding: 2rem 1rem; /* Padding top/bottom 2rem, left/right 1rem */
+            background-color: #f7fafc; /* Light gray background */
         }
 
-        /* Kiểu cho từng ô countdown riêng lẻ */
+        /* === CSS FIX FOR CENTERING SINGLE CARD === */
+        /* Styling for the grid container holding countdown cards */
+        #multipleCountdownsContainer {
+            display: grid;
+            gap: 1.5rem; /* Equivalent to gap-6 */
+            width: 100%;
+            max-width: 6xl; /* Tailwind class equivalent */
+            margin-bottom: 2rem; /* Equivalent to mb-8 */
+            /*
+             * Use auto-fit: Creates as many columns as fit within the container.
+             * minmax(300px, 1fr): Each column is at least 300px wide,
+             * and expands equally (1fr) to fill extra space.
+             */
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            /* Center the grid items horizontally within the container */
+            justify-content: center;
+        }
+        /* Styling for the placeholder message */
+        #noActiveCountdowns {
+            /* Ensure the placeholder spans all columns if grid is empty */
+            grid-column: 1 / -1; /* Span from first to last column line */
+            text-align: center;
+            color: #6b7280; /* text-gray-500 */
+        }
+        /* === END CSS FIX === */
+
+
+        /* Styling for individual countdown cards */
         .countdown-card {
             background-color: white;
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 0.75rem; /* Rounded corners */
+            padding: 1.5rem; /* Padding inside the card */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Shadow */
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* --- THAY ĐỔI: Xóa border-top --- */
-            /* border-top: 4px solid; */
-            /* border-color: var(--card-border-color, #6366f1); */
+            width: 100%; /* Card takes full width of its grid column */
+            position: relative; /* Needed for absolute positioning inside */
         }
 
-        .countdown-card .card-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: #1f2937;
+        /* Container for icon and title */
+        .countdown-card .card-title-container {
+            display: flex;
+            align-items: center; /* Vertically align icon and text */
+            justify-content: center; /* Center content horizontally */
             margin-bottom: 0.5rem;
             text-align: center;
+            word-break: break-word; /* Prevent long titles from overflowing */
         }
+        /* Icon styling within the card */
+        .countdown-card .event-icon {
+            font-size: 1.25rem; /* Icon size */
+            margin-right: 0.5rem; /* Space between icon and title */
+            flex-shrink: 0; /* Prevent icon from shrinking */
+        }
+        /* Title styling */
+        .countdown-card .card-title {
+            font-size: 1.125rem; /* ~18px */
+            font-weight: 600; /* Semi-bold */
+            color: #1f2937; /* Dark gray text */
+        }
+        /* Target date styling */
          .countdown-card .card-target-date {
-             font-size: 0.875rem;
-             color: #6b7280;
+             font-size: 0.875rem; /* ~14px */
+             color: #6b7280; /* Medium gray text */
              margin-bottom: 1rem;
              text-align: center;
          }
+         /* Recurring icon indicator */
+         .recurring-indicator {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.75rem; /* Small icon */
+            color: #6b7280; /* Medium gray */
+            cursor: default; /* Indicate it's not clickable */
+         }
 
-        /* Bố cục ô thời gian - Sử dụng Grid */
+        /* Layout for time units (Days, Hours, Mins, Secs) using Grid */
         .countdown-card .timer-display {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
+            /* Always use 4 columns for the time units */
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.75rem; /* Gap between time boxes */
             width: 100%;
+            margin-top: 1rem; /* Space above the timer */
         }
-
+        /* Styling for individual time boxes (e.g., the 'Days' box) */
         .countdown-card .time-box {
-            background-color: #4A5568;
-            padding: 0.6rem 1rem;
-            border-radius: 0.375rem;
+            background-color: #4A5568; /* Dark gray-blue background */
+            padding: 0.6rem 0.5rem; /* Vertical and horizontal padding */
+            border-radius: 0.375rem; /* Slightly rounded corners */
             text-align: center;
+            display: flex; /* Use flexbox for vertical centering */
+            flex-direction: column;
+            justify-content: center;
+            min-height: 60px; /* Ensure consistent height */
         }
+        /* Styling for the time value (the number) */
         .countdown-card .time-value {
-            font-size: 1.5rem;
-            font-weight: 600;
-            line-height: 1.2;
-            color: white; /* Đặt màu chữ trắng cố định */
+            font-size: 1.5rem; /* ~24px */
+            font-weight: 600; /* Semi-bold */
+            line-height: 1.2; /* Adjust line height */
+            color: white; /* White text */
         }
+        /* Specific color for the 'Days' value */
         .countdown-card .time-value.days-value {
-             color: #EF4444; /* Màu đỏ cho ngày */
+             color: #FBBF24; /* Amber color for days */
         }
+        /* Styling for the time label (e.g., 'Ngày', 'Giờ') */
         .countdown-card .time-label {
-            font-size: 0.7rem;
-            color: #A0AEC0;
+            font-size: 0.7rem; /* ~11px */
+            color: #A0AEC0; /* Lighter gray text */
             margin-top: 0.1rem;
+            text-transform: uppercase; /* Uppercase labels */
         }
-         /* Trạng thái kết thúc */
-        .countdown-card.finished {
-             /* --- THAY ĐỔI: Xóa border-color khi kết thúc --- */
-             /* border-color: #10b981; */
-             opacity: 0.8;
+         /* Styling for the 'finished' state (ONLY for non-recurring events) */
+        .countdown-card.finished:not(.recurring-active) { /* Target only finished, non-recurring */
+             opacity: 0.7; /* Slightly faded */
         }
-        .countdown-card.finished .timer-display {
-            grid-template-columns: 1fr;
-            font-size: 1.25rem;
+        /* Styling for the timer display when finished (ONLY for non-recurring events) */
+        .countdown-card.finished:not(.recurring-active) .timer-display {
+            grid-template-columns: 1fr; /* Single column */
+            font-size: 1.25rem; /* ~20px */
             font-weight: 600;
-            color: #059669;
+            color: #16A34A; /* Green color for finished message */
             padding: 1rem 0;
             text-align: center;
         }
 
+        /* Message area styling */
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            display: none; /* Hidden by default */
+            text-align: center;
+            width: 100%;
+            max-width: 500px; /* Limit width */
+            font-size: 0.875rem;
+        }
+        .error-message { background-color: #FEE2E2; color: #B91C1C; border: 1px solid #FCA5A5; }
+        .success-message { background-color: #D1FAE5; color: #047857; border: 1px solid #6EE7B7; }
+        .info-message { background-color: #DBEAFE; color: #1D4ED8; border: 1px solid #93C5FD; }
 
-        /* --- Các kiểu khác giữ nguyên --- */
-        .message { padding: 0.75rem 1rem; border-radius: 0.375rem; margin-top: 1rem; margin-bottom: 1rem; display: none; text-align: center; width: 100%; max-width: 400px; }
-        .error-message { background-color: #FED7D7; color: #C53030; border: 1px solid #F56565; }
-        .success-message { background-color: #C6F6D5; color: #2F855A; border: 1px solid #68D391; }
-        .info-message { background-color: #EBF8FF; color: #3182CE; border: 1px solid #90CDF4; }
+        /* Container for input form and saved events list */
+        #detailsContainer {
+            width: 100%;
+            max-width: 500px; /* Limit width */
+            margin-top: 1.5rem;
+            transition: opacity 0.3s ease, max-height 0.5s ease; /* Smooth transitions */
+            overflow: hidden; /* Hide content when collapsed */
+        }
+        /* Styling for hidden state */
+        #detailsContainer.hidden {
+            opacity: 0;
+            max-height: 0;
+            margin-top: 0;
+            padding: 0;
+            border: none;
+        }
 
-        #detailsContainer { width: 100%; max-width: 500px; margin-top: 1.5rem; transition: opacity 0.3s ease, max-height 0.3s ease; overflow: hidden; }
-        #detailsContainer.hidden { opacity: 0; max-height: 0; margin-top: 0; padding: 0; border: none; }
+        /* Styling for the list of saved events */
+        #savedEventsList {
+            width: 100%;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem;
+            max-height: 300px; /* Limit height and enable scroll */
+            overflow-y: auto; /* Add vertical scrollbar when needed */
+        }
+        /* Styling for each item in the saved list */
+        .saved-event-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #E2E8F0; /* Separator line */
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .saved-event-item:last-child { border-bottom: none; } /* Remove border for last item */
+        .saved-event-item:hover { background-color: #F8FAFC; } /* Hover effect */
+        /* Styling for the selected item */
+        .saved-event-item.selected {
+            background-color: #EFF6FF; /* Light blue background */
+            border-left: 4px solid #3B82F6; /* Blue left border */
+            padding-left: calc(1rem - 4px); /* Adjust padding to account for border */
+        }
+        /* Container for event info (title, date, category) */
+        .saved-event-item .event-info {
+            flex-grow: 1; /* Allow info to take available space */
+            margin-right: 1rem; /* Space before delete button */
+            overflow: hidden; /* Prevent long text overflow */
+        }
+        /* Container for icon and title in the list */
+        .saved-event-item .event-title-container {
+             display: flex;
+             align-items: center;
+             margin-bottom: 0.2rem; /* Space below title line */
+        }
+        /* Icon styling in the list */
+        .saved-event-item .event-icon-list {
+            font-size: 1rem; /* Icon size */
+            margin-right: 0.4rem; /* Space between icon and title */
+            flex-shrink: 0; /* Prevent icon shrinking */
+            width: 1.2em; /* Ensure consistent width even if no icon */
+            display: inline-block; /* Align properly */
+            text-align: center;
+        }
+        /* Title styling in the list */
+        .saved-event-item .event-title {
+            font-weight: 500; /* Medium weight */
+            color: #1F2937; /* Dark gray */
+            white-space: nowrap; /* Prevent title wrapping */
+            overflow: hidden;
+            text-overflow: ellipsis; /* Add ... for long titles */
+        }
+        /* Date styling in the list */
+        .saved-event-item .event-date {
+            font-size: 0.875rem; /* ~14px */
+            color: #6B7280; /* Medium gray */
+        }
+        /* Category styling in the list */
+        .saved-event-item .event-category {
+            font-size: 0.75rem; /* ~12px */
+            color: #9CA3AF; /* Lighter gray */
+            margin-top: 0.2rem;
+            font-style: italic;
+        }
+        /* Delete button styling */
+        .delete-button {
+            background-color: #FEE2E2; /* Light red background */
+            color: #DC2626; /* Red text */
+            border: none;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.8rem; /* Smaller font */
+            font-weight: 600; /* Semi-bold */
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            flex-shrink: 0; /* Prevent button shrinking */
+        }
+        .delete-button:hover {
+            background-color: #FECACA; /* Slightly darker red on hover */
+            color: #B91C1C;
+        }
 
-        #savedEventsList { width: 100%; background-color: white; border-radius: 0.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 1rem; }
-        .saved-event-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #E2E8F0; cursor: pointer; transition: background-color 0.2s ease; }
-        .saved-event-item:last-child { border-bottom: none; }
-        .saved-event-item:hover { background-color: #F7FAFC; }
-        .saved-event-item.selected { background-color: #ebf8ff; border-left: 4px solid #3b82f6;}
-        .saved-event-item .event-info { flex-grow: 1; margin-right: 1rem; }
-        .saved-event-item .event-title { font-weight: 500; color: #2D3748; }
-        .saved-event-item .event-date { font-size: 0.875rem; color: #718096; }
-        .delete-button { background-color: #FED7D7; color: #C53030; border: none; padding: 0.3rem 0.6rem; border-radius: 0.375rem; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s ease; }
-        .delete-button:hover { background-color: #FBB6B6; }
+        /* Toggle button styling */
+        #toggleDetailsButton {
+            margin-top: 0; /* Reset margin */
+            margin-bottom: 1rem;
+        }
 
-        /* --- THAY ĐỔI: Xóa kiểu cho #countdownColor --- */
-        /* #countdownColor { ... } */
+        /* Input form styling */
+        #inputFormContainer label { margin-bottom: 0.25rem; display: block; /* Ensure label is block */ }
+        #inputFormContainer .mb-4 { margin-bottom: 1rem; } /* Consistent spacing */
+        #inputFormContainer textarea { resize: vertical; /* Allow vertical resize only */ }
+        #inputFormContainer input, #inputFormContainer textarea, #inputFormContainer select { /* Include select */
+             border-color: #D1D5DB; /* Default border color */
+        }
+        #inputFormContainer input:focus, #inputFormContainer textarea:focus, #inputFormContainer select:focus {
+             border-color: #3B82F6; /* Blue border on focus */
+             box-shadow: 0 0 0 1px #3B82F6; /* Blue ring on focus */
+             outline: none; /* Remove default outline */
+        }
+        /* Checkbox styling */
+        #inputFormContainer .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.875rem;
+            color: #374151;
+        }
+        #inputFormContainer input[type="checkbox"] {
+            height: 1rem;
+            width: 1rem;
+            margin-right: 0.5rem;
+            border-radius: 0.25rem;
+            border-color: #D1D5DB;
+            color: #3B82F6; /* Checkmark color */
+            cursor: pointer;
+        }
+        #inputFormContainer input[type="checkbox"]:focus {
+            ring: 2px;
+            ring-offset: 2px;
+             --tw-ring-offset-color: #fff;
+             --tw-ring-color: #60A5FA;
+             box-shadow: none; /* Remove default browser focus */
+             border-color: #3B82F6;
+        }
 
-        #toggleDetailsButton { margin-top: 0; margin-bottom: 1rem; }
 
-        .form-button-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; }
-        .form-button { padding: 0.5rem 1rem; font-weight: 600; border-radius: 0.375rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: all 0.2s ease-in-out; text-align: center; cursor: pointer; border: 1px solid transparent; }
-        .form-button:focus { outline: none; ring-offset: 2px; ring: 2px; }
-        #startButton { background-color: #3B82F6; color: white; } #startButton:hover { background-color: #2563EB; } #startButton:focus { ring-color: #60A5FA; }
-        #saveButton { background-color: #10B981; color: white; } #saveButton:hover { background-color: #059669; } #saveButton:focus { ring-color: #34D399; }
-        #newButton { background-color: #F97316; color: white; } #newButton:hover { background-color: #EA580C; } #newButton:focus { ring-color: #FB923C; }
+        /* Button group styling */
+        .form-button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsive columns */
+            gap: 0.75rem; /* Gap between buttons */
+            margin-top: 1.5rem; /* Space above button group */
+        }
+        /* General button styling */
+        .form-button {
+            padding: 0.6rem 1rem; /* Slightly larger padding */
+            font-weight: 600; /* Semi-bold */
+            border-radius: 0.375rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease-in-out;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .form-button:focus {
+            outline: none;
+            /* Tailwind focus ring */
+            --tw-ring-offset-width: 2px;
+            --tw-ring-offset-color: #fff;
+            --tw-ring-color: var(--focus-ring-color, #93C5FD); /* Default blue, can be overridden */
+            --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+            box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+        }
+        /* Specific button styles */
+        #startButton { background-color: #3B82F6; color: white; --focus-ring-color: #60A5FA; }
+        #startButton:hover { background-color: #2563EB; }
+
+        #saveButton { background-color: #10B981; color: white; --focus-ring-color: #34D399; }
+        #saveButton:hover { background-color: #059669; }
+
+        #newButton { background-color: #F97316; color: white; --focus-ring-color: #FB923C; }
+        #newButton:hover { background-color: #EA580C; }
+
+        /* Responsive adjustments for time display within cards */
+        @media (max-width: 420px) { /* Smaller mobile screens */
+            .countdown-card .timer-display {
+                grid-template-columns: repeat(2, 1fr); /* Force 2 columns */
+                gap: 0.5rem; /* Reduce gap */
+            }
+             .countdown-card .time-value {
+                 font-size: 1.25rem; /* Slightly smaller font */
+             }
+             .countdown-card .time-label {
+                 font-size: 0.65rem; /* Slightly smaller font */
+             }
+             .countdown-card .time-box {
+                 min-height: 50px; /* Reduce min height */
+                 padding: 0.5rem 0.4rem;
+             }
+        }
+
     </style>
 </head>
 <body class="bg-gray-100">
@@ -131,11 +381,11 @@
     <div class="main-container">
         <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6 text-center">Bảng Điều Khiển Đếm Ngược</h1>
 
-        <div id="multipleCountdownsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mb-8">
-            <p id="noActiveCountdowns" class="text-center text-gray-500 col-span-1 md:col-span-2">Không có sự kiện nào đang đếm ngược. Hãy thêm một sự kiện mới!</p>
-        </div>
+        <div id="multipleCountdownsContainer">
+            <p id="noActiveCountdowns">Không có sự kiện nào đang đếm ngược. Hãy thêm một sự kiện mới!</p>
+            </div>
 
-        <button id="toggleDetailsButton" class="px-4 py-2 bg-gray-500 text-white text-sm font-semibold rounded-md shadow hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition duration-150 ease-in-out">
+        <button id="toggleDetailsButton" class="px-4 py-2 bg-gray-500 text-white text-sm font-semibold rounded-md shadow hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition duration-150 ease-in-out mb-4">
              Hiện chi tiết quản lý
          </button>
 
@@ -145,15 +395,40 @@
             <div id="inputFormContainer" class="w-full bg-white p-6 rounded-lg shadow-md mb-6">
                  <h2 id="formTitle" class="text-xl font-semibold text-gray-700 mb-4 text-center">Thêm sự kiện mới</h2>
                  <input type="hidden" id="editingEventId">
+
                  <div class="mb-4">
-                    <label for="eventTitle" class="block text-sm font-medium text-gray-700 mb-1">Tên sự kiện:</label>
+                    <label for="eventTitle" class="block text-sm font-medium text-gray-700">Tên sự kiện:</label>
                     <input type="text" id="eventTitle" placeholder="Ví dụ: Sinh nhật của tôi" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div class="mb-4">
-                    <label for="eventDate" class="block text-sm font-medium text-gray-700 mb-1">Ngày và giờ:</label>
+                 </div>
+
+                 <div class="mb-4">
+                    <label for="eventDate" class="block text-sm font-medium text-gray-700">Ngày và giờ:</label>
                     <input type="datetime-local" id="eventDate" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                 </div>
+
+                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                     <div>
+                         <label for="eventIcon" class="block text-sm font-medium text-gray-700">Biểu tượng (Emoji):</label>
+                         <input type="text" id="eventIcon" placeholder="🎂 🎉 ✈️ ..." class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                     </div>
+                     <div>
+                         <label for="eventCategory" class="block text-sm font-medium text-gray-700">Danh mục:</label>
+                         <input type="text" id="eventCategory" placeholder="Cá nhân, Công việc..." class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
                 </div>
-                <div class="form-button-group">
+
+                 <div class="mb-4">
+                    <label for="eventNotes" class="block text-sm font-medium text-gray-700">Ghi chú:</label>
+                    <textarea id="eventNotes" rows="3" placeholder="Thêm mô tả hoặc chi tiết cho sự kiện..." class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+                 </div>
+
+                 <div class="mb-4">
+                     <label for="eventRecurring" class="checkbox-label">
+                         <input type="checkbox" id="eventRecurring" class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded">
+                         <span>Lặp lại hàng năm?</span>
+                     </label>
+                 </div>
+                 <div class="form-button-group">
                      <button id="startButton" class="form-button">Cập nhật sự kiện</button>
                      <button id="saveButton" class="form-button">Lưu sự kiện mới</button>
                      <button id="newButton" class="form-button">Hủy / Tạo mới</button>
@@ -162,23 +437,25 @@
 
             <div id="savedEventsContainer" class="w-full">
                  <h2 class="text-xl font-semibold text-gray-700 mb-3 text-center">Quản lý sự kiện đã lưu</h2>
-                 <div id="savedEventsList" class="max-h-80 overflow-y-auto bg-white rounded-lg shadow">
+                 <div id="savedEventsList" class="bg-white rounded-lg shadow">
                      <p id="noEventsMessage" class="text-center text-gray-500 py-4">Chưa có sự kiện nào được lưu.</p>
-                 </div>
+                     </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- DOM Elements ---
+        // --- DOM Element References ---
         const multipleCountdownsContainer = document.getElementById('multipleCountdownsContainer');
         const noActiveCountdownsMsg = document.getElementById('noActiveCountdowns');
         const formTitle = document.getElementById('formTitle');
         const editingEventIdInput = document.getElementById('editingEventId');
         const eventTitleInput = document.getElementById('eventTitle');
         const eventDateInput = document.getElementById('eventDate');
-        // --- THAY ĐỔI: Xóa biến input màu ---
-        // const countdownColorInput = document.getElementById('countdownColor');
+        const eventIconInput = document.getElementById('eventIcon');
+        const eventCategoryInput = document.getElementById('eventCategory');
+        const eventNotesInput = document.getElementById('eventNotes');
+        const eventRecurringInput = document.getElementById('eventRecurring');
         const startButton = document.getElementById('startButton');
         const saveButton = document.getElementById('saveButton');
         const newButton = document.getElementById('newButton');
@@ -190,10 +467,15 @@
 
         // --- State Variables ---
         let countdownIntervals = {};
-        let savedEvents = [];
+        let savedEvents = []; // { id, title, date, icon, notes, category, isRecurring, originalDate }
         let detailsVisible = false;
 
         // --- Utility Functions ---
+
+        /**
+         * Generates a default datetime string (tomorrow 9 AM).
+         * @returns {string} Formatted datetime string.
+         */
         function getDefaultDateTime() {
             const now = new Date();
             now.setDate(now.getDate() + 1);
@@ -206,33 +488,62 @@
             return `${year}-${month}-${day}T${hours}:${minutes}`;
         }
 
+        /**
+         * Formats a date string for display.
+         * @param {string} dateString - Date string.
+         * @returns {string} Formatted date or error message.
+         */
         function formatDisplayDate(dateString) {
             if (!dateString) return "";
             try {
                 const date = new Date(dateString);
-                if (isNaN(date)) return "Ngày không hợp lệ";
-                return date.toLocaleString('vi-VN', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-            } catch (e) { return "Ngày không hợp lệ"; }
+                if (isNaN(date.getTime())) return "Ngày không hợp lệ";
+                return date.toLocaleString('vi-VN', {
+                    year: 'numeric', month: 'numeric', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                });
+            } catch (e) { console.error("Error formatting date:", e); return "Ngày lỗi"; }
         }
 
+        /**
+         * Displays a message to the user.
+         * @param {string} text - Message text.
+         * @param {'error'|'success'|'info'} type - Message type.
+         */
         function showMessage(text, type = 'error') {
             messageArea.textContent = text;
             messageArea.className = `message ${type}-message`;
             messageArea.style.display = 'block';
-            if (!detailsVisible) { messageArea.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+            if (!detailsVisible || !isElementInViewport(messageArea)) {
+                messageArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             setTimeout(() => { messageArea.style.display = 'none'; }, 5000);
         }
 
+        /**
+         * Checks if an element is in the viewport.
+         * @param {HTMLElement} el - The element.
+         * @returns {boolean} True if in viewport.
+         */
+        function isElementInViewport (el) {
+            if (!el) return false;
+            const rect = el.getBoundingClientRect();
+            return ( rect.top >= 0 && rect.left >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && rect.right <= (window.innerWidth || document.documentElement.clientWidth) );
+        }
+
+        /**
+         * Toggles the visibility of the details section.
+         * @param {boolean} [show] - Force show/hide.
+         */
         function toggleDetailsVisibility(show) {
             detailsVisible = (typeof show === 'boolean') ? show : !detailsVisible;
             if (detailsVisible) {
                 detailsContainer.classList.remove('hidden');
-                detailsContainer.style.maxHeight = '1000px';
-                setTimeout(() => { detailsContainer.style.maxHeight = detailsContainer.scrollHeight + "px"; }, 50);
+                requestAnimationFrame(() => { detailsContainer.style.maxHeight = detailsContainer.scrollHeight + "px"; });
                 toggleDetailsButton.textContent = "Ẩn chi tiết quản lý";
             } else {
-                 detailsContainer.style.maxHeight = "0";
-                 setTimeout(() => { detailsContainer.classList.add('hidden'); }, 300);
+                detailsContainer.style.maxHeight = "0";
+                setTimeout(() => { detailsContainer.classList.add('hidden'); }, 300);
                 toggleDetailsButton.textContent = "Hiện chi tiết quản lý";
                 clearEditSelection();
             }
@@ -240,38 +551,45 @@
 
         // --- Countdown Display Logic ---
 
+        /**
+         * Renders or updates a countdown card.
+         * @param {object} eventData - The event object.
+         */
         function renderOrUpdateCountdownCard(eventData) {
             const existingCard = document.getElementById(`countdown-${eventData.id}`);
             let cardElement = existingCard;
             let timerDisplayElement;
 
             const targetTime = new Date(eventData.date).getTime();
+            if (isNaN(targetTime)) {
+                console.warn(`Skipping render: Invalid date for event "${eventData.title}"`);
+                if (existingCard) existingCard.remove(); checkIfNoCountdowns(); return;
+            }
+
             const now = new Date().getTime();
             const distance = targetTime - now;
-            const isFinished = distance < 0;
+            const isEffectivelyFinished = distance < 0 && !eventData.isRecurring;
             const placeholder = multipleCountdownsContainer.querySelector('#noActiveCountdowns');
 
             if (!cardElement) {
                 cardElement = document.createElement('div');
                 cardElement.className = 'countdown-card';
                 cardElement.id = `countdown-${eventData.id}`;
-                if (placeholder) {
-                     multipleCountdownsContainer.insertBefore(cardElement, placeholder);
-                } else {
-                    multipleCountdownsContainer.appendChild(cardElement);
-                }
-                if (placeholder) placeholder.style.display = 'none';
+                if (placeholder) { multipleCountdownsContainer.insertBefore(cardElement, placeholder); }
+                else { multipleCountdownsContainer.appendChild(cardElement); }
             }
 
-            // --- THAY ĐỔI: Xóa việc đặt màu viền ---
-            // cardElement.style.setProperty('--card-border-color', eventData.color || '#6366f1');
-            // cardElement.style.setProperty('--countdown-text-color', '#FFFFFF'); // Không cần thiết nữa vì màu chữ time-value đã cố định
+            cardElement.classList.toggle('recurring-active', eventData.isRecurring); // Use toggle for cleaner class management
 
             cardElement.innerHTML = `
-                <h3 class="card-title">${eventData.title}</h3>
+                ${eventData.isRecurring ? '<span class="recurring-indicator" title="Sự kiện lặp lại hàng năm">🔁</span>' : ''}
+                <div class="card-title-container">
+                    ${eventData.icon ? `<span class="event-icon">${eventData.icon}</span>` : ''}
+                    <h3 class="card-title">${eventData.title || 'Sự kiện không tên'}</h3>
+                </div>
                 <p class="card-target-date">Đến: ${formatDisplayDate(eventData.date)}</p>
                 <div class="timer-display">
-                    ${isFinished ? 'Đã đến giờ!' : `
+                    ${isEffectivelyFinished ? 'Đã đến giờ!' : `
                         <div class="time-box"><div class="time-value days-value" data-unit="days">0</div><div class="time-label">Ngày</div></div>
                         <div class="time-box"><div class="time-value" data-unit="hours">0</div><div class="time-label">Giờ</div></div>
                         <div class="time-box"><div class="time-value" data-unit="minutes">0</div><div class="time-label">Phút</div></div>
@@ -282,37 +600,59 @@
 
             timerDisplayElement = cardElement.querySelector('.timer-display');
 
-            if (isFinished) {
+            if (isEffectivelyFinished) {
                 cardElement.classList.add('finished');
-                timerDisplayElement.style.gridTemplateColumns = '1fr';
+                 if (timerDisplayElement) timerDisplayElement.style.gridTemplateColumns = '1fr';
                 stopCountdownInterval(eventData.id);
             } else {
                 cardElement.classList.remove('finished');
-                timerDisplayElement.style.gridTemplateColumns = 'repeat(2, 1fr)';
-                updateSingleCountdownTime(eventData.id, timerDisplayElement);
-                startCountdownInterval(eventData.id, timerDisplayElement);
+                 if (timerDisplayElement) {
+                      timerDisplayElement.style.gridTemplateColumns = ''; // Reset grid
+                      updateSingleCountdownTime(eventData.id, timerDisplayElement);
+                      startCountdownInterval(eventData.id, timerDisplayElement);
+                 }
             }
+            checkIfNoCountdowns();
         }
 
+        /**
+         * Updates the time display for a countdown, handles recurrence.
+         * @param {number} eventId - Event ID.
+         * @param {HTMLElement} timerDisplayElement - Timer display container.
+         */
         function updateSingleCountdownTime(eventId, timerDisplayElement) {
-            const eventData = savedEvents.find(e => e.id === eventId);
-            if (!eventData || !timerDisplayElement) return;
+            const eventIndex = savedEvents.findIndex(e => e.id === eventId);
+            if (eventIndex === -1) { stopCountdownInterval(eventId); removeCountdownCard(eventId); return; }
+            const eventData = savedEvents[eventIndex];
 
-            const targetTime = new Date(eventData.date).getTime();
-            const now = new Date().getTime();
-            const distance = targetTime - now;
-
-            if (distance < 0) {
-                const card = timerDisplayElement.closest('.countdown-card');
-                if (card && !card.classList.contains('finished')) {
-                    timerDisplayElement.innerHTML = 'Đã đến giờ!';
-                    card.classList.add('finished');
-                    timerDisplayElement.style.gridTemplateColumns = '1fr';
-                    stopCountdownInterval(eventId);
-                }
+            // Ensure the timer element is still part of the DOM for this card ID
+            if (!timerDisplayElement || !timerDisplayElement.closest(`#countdown-${eventId}`)) {
+                stopCountdownInterval(eventId);
                 return;
             }
 
+            const targetTime = new Date(eventData.date).getTime();
+            const now = new Date().getTime();
+            let distance = targetTime - now;
+
+            if (distance < 0) {
+                stopCountdownInterval(eventId); // Stop interval regardless of recurrence
+                if (eventData.isRecurring) {
+                    handleRecurringEvent(eventData); // Handle the recurrence logic
+                    return; // Exit after handling recurrence
+                } else {
+                    // Handle non-recurring finished event
+                    const card = timerDisplayElement.closest('.countdown-card');
+                    if (card && !card.classList.contains('finished')) {
+                        timerDisplayElement.innerHTML = 'Đã đến giờ!';
+                        card.classList.add('finished');
+                        timerDisplayElement.style.gridTemplateColumns = '1fr';
+                    }
+                    return; // Stop updates for finished non-recurring event
+                }
+            }
+
+            // Update time display if still active
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
@@ -323,24 +663,122 @@
             const minutesEl = timerDisplayElement.querySelector('[data-unit="minutes"]');
             const secondsEl = timerDisplayElement.querySelector('[data-unit="seconds"]');
 
+            // Only update if value changed
             if (daysEl && daysEl.textContent != days) daysEl.textContent = days;
             if (hoursEl && hoursEl.textContent != hours) hoursEl.textContent = hours;
             if (minutesEl && minutesEl.textContent != minutes) minutesEl.textContent = minutes;
             if (secondsEl && secondsEl.textContent != seconds) secondsEl.textContent = seconds;
         }
 
+        /**
+         * Handles recurring event logic: calculates next date, updates data, re-renders.
+         * @param {object} eventData - The finished recurring event.
+         */
+        function handleRecurringEvent(eventData) {
+             console.log(`Handling recurring event: ${eventData.title}`);
+             // Use originalDate if available, otherwise fallback to the current date
+             const baseDateStr = eventData.originalDate || eventData.date;
+             let nextOccurrence = new Date(baseDateStr);
+
+             // Validate the base date
+             if (isNaN(nextOccurrence.getTime())) {
+                 console.error(`Invalid base date ("${baseDateStr}") for recurring event: ${eventData.title}`);
+                 // Prevent infinite loops: Mark as non-recurring and finished
+                 const eventIndex = savedEvents.findIndex(e => e.id === eventData.id);
+                 if (eventIndex > -1) {
+                     savedEvents[eventIndex].isRecurring = false;
+                     saveEvents();
+                     renderOrUpdateCountdownCard(savedEvents[eventIndex]); // Re-render as finished non-recurring
+                 }
+                 return;
+             }
+
+             const now = new Date().getTime();
+             let yearsToAdd = 1;
+             let safetyCounter = 0; // Prevent infinite loops
+
+             // Calculate the next occurrence date that is in the future
+             while (safetyCounter < 100) {
+                // Create a new date object based on the original date each time
+                let potentialNext = new Date(baseDateStr);
+                // Add years to the original date
+                potentialNext.setFullYear(potentialNext.getFullYear() + yearsToAdd);
+
+                 // Check if this potential date is in the future
+                 if (potentialNext.getTime() > now) {
+                     nextOccurrence = potentialNext; // Found the next valid date
+                     break;
+                 }
+                 yearsToAdd++;
+                 safetyCounter++;
+             }
+
+             // Handle case where no future date is found within the limit
+             if (safetyCounter >= 100) {
+                 console.error(`Could not find a future occurrence within 100 years for: ${eventData.title}`);
+                 const eventIndex = savedEvents.findIndex(e => e.id === eventData.id);
+                  if (eventIndex > -1) { // Mark as non-recurring
+                      savedEvents[eventIndex].isRecurring = false;
+                      saveEvents();
+                      renderOrUpdateCountdownCard(savedEvents[eventIndex]);
+                  }
+                 return;
+             }
+
+             // Update the event in the savedEvents array
+             const eventIndex = savedEvents.findIndex(e => e.id === eventData.id);
+             if (eventIndex > -1) {
+                 // Format the calculated next occurrence date back into YYYY-MM-DDTHH:mm string
+                 const year = nextOccurrence.getFullYear();
+                 const month = String(nextOccurrence.getMonth() + 1).padStart(2, '0');
+                 const day = String(nextOccurrence.getDate()).padStart(2, '0');
+                 const hours = String(nextOccurrence.getHours()).padStart(2, '0');
+                 const minutes = String(nextOccurrence.getMinutes()).padStart(2, '0');
+                 const nextDateString = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+                 savedEvents[eventIndex].date = nextDateString; // Update the date
+
+                 console.log(`Event "${eventData.title}" updated to next occurrence: ${nextDateString}`);
+
+                 saveEvents(); // Save the updated list to localStorage
+                 // Re-render the specific card to reflect the new date and restart the timer
+                 renderOrUpdateCountdownCard(savedEvents[eventIndex]);
+             } else {
+                 console.error(`Could not find event ${eventData.id} in array to update recurrence.`);
+             }
+        }
+
+
+        /**
+         * Starts the interval timer for a countdown.
+         * @param {number} eventId - The event ID.
+         * @param {HTMLElement} timerDisplayElement - The timer display container.
+         */
         function startCountdownInterval(eventId, timerDisplayElement) {
-            stopCountdownInterval(eventId);
-            if (!timerDisplayElement || timerDisplayElement.closest('.countdown-card')?.classList.contains('finished')) {
+            stopCountdownInterval(eventId); // Clear existing interval first
+            const card = timerDisplayElement?.closest('.countdown-card');
+            // Do not start if card doesn't exist or is marked as finished (non-recurring)
+            if (!card || card.classList.contains('finished')) {
                  return;
             }
+            // Create new interval
             if (!countdownIntervals[eventId]) {
                  countdownIntervals[eventId] = setInterval(() => {
-                    updateSingleCountdownTime(eventId, timerDisplayElement);
+                     // Re-fetch the element inside interval for safety
+                     const currentTimerDisplay = document.getElementById(`countdown-${eventId}`)?.querySelector('.timer-display');
+                     if (currentTimerDisplay) {
+                        updateSingleCountdownTime(eventId, currentTimerDisplay);
+                     } else {
+                         stopCountdownInterval(eventId); // Stop if element is gone
+                     }
                  }, 1000);
             }
         }
 
+        /**
+         * Stops the interval timer for a countdown.
+         * @param {number} eventId - The event ID.
+         */
         function stopCountdownInterval(eventId) {
             if (countdownIntervals[eventId]) {
                 clearInterval(countdownIntervals[eventId]);
@@ -348,156 +786,299 @@
             }
         }
 
+        /**
+         * Removes a countdown card from the display.
+         * @param {number} eventId - The event ID.
+         */
         function removeCountdownCard(eventId) {
             const card = document.getElementById(`countdown-${eventId}`);
             if (card) {
                 card.remove();
             }
-            if (multipleCountdownsContainer.querySelectorAll('.countdown-card').length === 0) {
-                 const placeholder = multipleCountdownsContainer.querySelector('#noActiveCountdowns');
-                 if(placeholder) placeholder.style.display = 'block';
-            }
+            checkIfNoCountdowns(); // Update placeholder visibility
         }
 
-        function renderAllActiveCountdowns() {
-            multipleCountdownsContainer.querySelectorAll('.countdown-card').forEach(card => card.remove());
-            const placeholder = multipleCountdownsContainer.querySelector('#noActiveCountdowns');
-            let hasAnyCountdown = savedEvents.length > 0;
+        /**
+         * Checks if any countdown cards are displayed and toggles the placeholder.
+         */
+        function checkIfNoCountdowns() {
+             const placeholder = multipleCountdownsContainer.querySelector('#noActiveCountdowns');
+             if (!placeholder) return;
+             const activeCards = multipleCountdownsContainer.querySelectorAll('.countdown-card');
+             placeholder.style.display = activeCards.length === 0 ? 'block' : 'none';
+        }
 
-            if (hasAnyCountdown) {
-                 if(placeholder) placeholder.style.display = 'none';
-                savedEvents.forEach(event => {
-                    const targetTime = new Date(event.date).getTime();
-                    if (!isNaN(targetTime)) {
-                        renderOrUpdateCountdownCard(event);
-                    }
-                });
-            } else {
-                 if(placeholder) placeholder.style.display = 'block';
-            }
-             if (multipleCountdownsContainer.querySelectorAll('.countdown-card').length > 0) {
-                  if(placeholder) placeholder.style.display = 'none';
-             }
+        /**
+         * Renders all active countdowns.
+         */
+        function renderAllActiveCountdowns() {
+            // Clear existing cards before rendering
+            multipleCountdownsContainer.querySelectorAll('.countdown-card').forEach(card => card.remove());
+            // Render each event
+            savedEvents.forEach(event => {
+                 renderOrUpdateCountdownCard(event);
+            });
+            checkIfNoCountdowns(); // Check placeholder visibility after rendering
         }
 
         // --- Local Storage & Event Management ---
+
+        /**
+         * Loads events from localStorage and ensures data consistency.
+         */
         function loadEvents() {
             const storedEvents = localStorage.getItem('countdownEvents');
+            let parsedEvents = [];
             try {
-                savedEvents = storedEvents ? JSON.parse(storedEvents) : [];
-                 if (!Array.isArray(savedEvents)) { savedEvents = []; }
-                 // --- THAY ĐỔI: Xóa thuộc tính 'color' nếu còn tồn tại từ phiên bản cũ ---
-                 savedEvents = savedEvents.map(event => {
-                     const { color, ...rest } = event; // Destructure để loại bỏ 'color'
-                     return rest; // Trả về đối tượng không có 'color'
-                 });
+                parsedEvents = storedEvents ? JSON.parse(storedEvents) : [];
+                 if (!Array.isArray(parsedEvents)) { parsedEvents = []; }
+
+                 // Data Migration: Ensure all events have required fields
+                 savedEvents = parsedEvents.map(event => ({
+                     id: event.id,
+                     title: event.title || 'Sự kiện không tên',
+                     date: event.date,
+                     icon: event.icon || '',
+                     notes: event.notes || '',
+                     category: event.category || '',
+                     isRecurring: event.isRecurring || false,
+                     originalDate: event.originalDate || null
+                 }));
+
             } catch (e) {
                 console.error("Error parsing saved events:", e);
                 savedEvents = [];
-                localStorage.removeItem('countdownEvents');
+                showMessage("Lỗi khi tải sự kiện đã lưu.", "error");
             }
             renderSavedEventsList();
             renderAllActiveCountdowns();
-            // Lưu lại danh sách đã được làm sạch (loại bỏ thuộc tính color)
-            saveEvents();
         }
 
+        /**
+         * Saves the current state of events to localStorage.
+         */
         function saveEvents() {
              try {
-                 // Đảm bảo không lưu thuộc tính 'color'
-                 const eventsToSave = savedEvents.map(event => {
-                     const { color, ...rest } = event;
-                     return rest;
-                 });
+                 // Map to ensure correct structure is saved
+                 const eventsToSave = savedEvents.map(event => ({
+                     id: event.id,
+                     title: event.title,
+                     date: event.date,
+                     icon: event.icon,
+                     notes: event.notes,
+                     category: event.category,
+                     isRecurring: event.isRecurring,
+                     originalDate: event.originalDate
+                 }));
                 localStorage.setItem('countdownEvents', JSON.stringify(eventsToSave));
              } catch (e) {
                  console.error("Error saving events:", e);
-                 showMessage("Lỗi: Không thể lưu trạng thái.", 'error');
+                 if (e.name === 'QuotaExceededError') { showMessage("Lỗi: Dung lượng lưu trữ đầy.", 'error'); }
+                 else { showMessage("Lỗi: Không thể lưu trạng thái.", 'error'); }
              }
         }
 
+        /**
+         * Renders the list of saved events.
+         */
         function renderSavedEventsList() {
             savedEventsList.innerHTML = '';
             const placeholder = noEventsMessage.cloneNode(true);
             savedEventsList.appendChild(placeholder);
 
-            if (savedEvents.length === 0) {
-                placeholder.style.display = 'block';
-                return;
-            }
+            if (savedEvents.length === 0) { placeholder.style.display = 'block'; return; }
             placeholder.style.display = 'none';
 
-            const sortedEvents = [...savedEvents].sort((a, b) => new Date(a.date) - new Date(b.date));
+            // Sort events by date (nearest first)
+            const sortedEvents = [...savedEvents].sort((a, b) => {
+                const dateA = new Date(a.date).getTime(); const dateB = new Date(b.date).getTime();
+                 if (isNaN(dateA)) return 1; if (isNaN(dateB)) return -1; return dateA - dateB;
+            });
 
+            // Create list items
             sortedEvents.forEach(event => {
                 const item = document.createElement('div');
                 item.className = 'saved-event-item';
                 item.dataset.id = event.id;
+                const recurringIndicator = event.isRecurring ? '<span title="Lặp lại hàng năm"> 🔁</span>' : '';
+
                 item.innerHTML = `
                     <div class="event-info">
-                        <div class="event-title">${event.title || 'Không có tiêu đề'}</div>
+                        <div class="event-title-container">
+                             <span class="event-icon-list">${event.icon || ''}</span>
+                             <span class="event-title">${event.title || 'Không có tiêu đề'}${recurringIndicator}</span>
+                         </div>
                         <div class="event-date">${formatDisplayDate(event.date)}</div>
+                         ${event.category ? `<div class="event-category">Danh mục: ${event.category}</div>` : ''}
                     </div>
-                    <button class="delete-button" data-id="${event.id}">Xóa</button>
+                    <button class="delete-button" aria-label="Xóa sự kiện ${event.title || 'Không có tiêu đề'}">Xóa</button>
                 `;
+
                 item.querySelector('.event-info').addEventListener('click', () => loadEventIntoForm(event.id));
-                item.querySelector('.delete-button').addEventListener('click', (e) => { e.stopPropagation(); deleteEvent(event.id); });
+
+                // === DEBUGGING: Add console logs to delete button listener ===
+                item.querySelector('.delete-button').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const eventId = event.id; // Get ID from the current event in the loop
+                    const eventTitle = event.title || 'Không có tiêu đề';
+                    console.log(`Delete button clicked for event ID: ${eventId}, Title: ${eventTitle}`); // Log click and ID
+                    if (window.confirm(`Bạn có chắc chắn muốn xóa sự kiện "${eventTitle}" không?`)) {
+                        console.log(`Confirmed deletion for event ID: ${eventId}`);
+                        deleteEvent(eventId); // Pass the correct ID
+                    } else {
+                        console.log(`Cancelled deletion for event ID: ${eventId}`);
+                    }
+                });
+                // === END DEBUGGING ===
+
                 savedEventsList.appendChild(item);
             });
         }
 
+        /**
+         * Deletes an event.
+         * @param {number} id - The event ID.
+         */
         function deleteEvent(id) {
-             const eventToDelete = savedEvents.find(e => e.id === id);
-             if (!eventToDelete) return;
+             // === DEBUGGING: Log function call and ID ===
+             console.log(`deleteEvent function called with ID: ${id}`);
+             // === END DEBUGGING ===
+
+             const eventIndex = savedEvents.findIndex(e => e.id === id); // Find index for potential removal check
+             if (eventIndex === -1) {
+                 console.warn(`Event with ID ${id} not found in savedEvents array.`);
+                 showMessage("Lỗi: Không tìm thấy sự kiện để xóa.", "error");
+                 return; // Exit if event not found
+             }
+             const eventToDelete = savedEvents[eventIndex]; // Get the event object
              const eventTitle = eventToDelete.title || "Không có tiêu đề";
-             savedEvents = savedEvents.filter(event => event.id !== id);
-             saveEvents();
-             renderSavedEventsList();
+
+             console.log(`Attempting to delete: ID=${id}, Title=${eventTitle}`);
+
+             // 1. Stop timer
+             console.log(`Stopping interval for ${id}`);
              stopCountdownInterval(id);
+
+             // 2. Remove UI card
+             console.log(`Removing card for ${id}`);
              removeCountdownCard(id);
-             if (editingEventIdInput.value == id) { clearEditSelection(); }
+
+             // 3. Remove from array
+             const originalLength = savedEvents.length;
+             savedEvents = savedEvents.filter(event => event.id !== id);
+             console.log(`Array filtered. Original length: ${originalLength}, New length: ${savedEvents.length}`);
+
+             // 4. Save changes
+             console.log(`Saving events after deletion`);
+             saveEvents();
+
+             // 5. Update management list
+             console.log(`Rendering saved events list after deletion`);
+             renderSavedEventsList();
+
+             // 6. Clear form if editing deleted event
+             if (editingEventIdInput.value == id) {
+                  console.log(`Clearing edit selection as deleted event ${id} was being edited.`);
+                  clearEditSelection();
+             }
+
+             // 7. Show success message
              showMessage(`Đã xóa sự kiện "${eventTitle}".`, 'success');
         }
 
-        function addOrUpdateEvent(eventData, isNew) {
-            // --- THAY ĐỔI: Xóa 'color' khỏi dữ liệu sự kiện ---
-            const { color, ...dataToSave } = eventData;
+        /**
+         * Adds or updates an event based on form data.
+         * @param {object} eventData - Placeholder (data read from form).
+         * @param {boolean} isNew - True if adding a new event.
+         * @returns {boolean} True on success, false on validation failure.
+         */
+        function addOrUpdateEvent(eventData = {}, isNew) {
+            const id = isNew ? Date.now() : parseInt(editingEventIdInput.value);
+            const dateValue = eventDateInput.value;
+            const isRecurringValue = eventRecurringInput.checked;
 
-            if (!dataToSave.title || !dataToSave.date) { showMessage("Lỗi: Thiếu tên hoặc ngày giờ.", 'error'); return; }
-            const targetTime = new Date(dataToSave.date).getTime();
-             if (isNaN(targetTime)) { showMessage("Lỗi: Ngày giờ không hợp lệ.", 'error'); return; }
+            // --- Validation ---
+            if (!eventTitleInput.value.trim() || !dateValue) {
+                showMessage("Lỗi: Tên sự kiện và Ngày giờ là bắt buộc.", 'error'); return false;
+            }
+            const targetTime = new Date(dateValue).getTime();
+             if (isNaN(targetTime)) {
+                 showMessage("Lỗi: Ngày giờ không hợp lệ.", 'error'); return false;
+             }
+             // Prevent saving new past events unless recurring
+             if (isNew && targetTime < new Date().getTime() && !isRecurringValue) {
+                  showMessage("Không thể lưu sự kiện mới trong quá khứ (trừ khi lặp lại).", 'error'); return false;
+             }
+             // --- End Validation ---
 
-            if (isNew) {
-                dataToSave.id = Date.now();
-                savedEvents.push(dataToSave);
-            } else {
+             // Determine originalDate for recurring events
+             let originalDateValue = null;
+             if (isRecurringValue) {
+                 if (isNew) { originalDateValue = dateValue; } // Set for new recurring
+                 else { // Keep existing or set if just turned recurring
+                     const existingEvent = savedEvents.find(e => e.id == id);
+                     originalDateValue = existingEvent?.originalDate || dateValue;
+                 }
+             }
+
+            // Prepare data object
+            const dataToSave = {
+                id: id,
+                title: eventTitleInput.value.trim() || "Sự kiện không tên",
+                date: dateValue,
+                icon: eventIconInput.value.trim(),
+                notes: eventNotesInput.value.trim(),
+                category: eventCategoryInput.value.trim(),
+                isRecurring: isRecurringValue,
+                originalDate: originalDateValue
+            };
+
+            // Add or Update in the array
+            if (isNew) { savedEvents.push(dataToSave); }
+            else {
                 const index = savedEvents.findIndex(e => e.id == dataToSave.id);
                 if (index > -1) { savedEvents[index] = dataToSave; }
-                else { console.error("Update failed: ID not found", dataToSave.id); showMessage("Lỗi: Không tìm thấy sự kiện.", 'error'); return; }
+                else { console.error("Update failed: ID not found", dataToSave.id); showMessage("Lỗi: Không tìm thấy sự kiện.", 'error'); return false; }
             }
-            saveEvents(); // Lưu dữ liệu đã loại bỏ 'color'
+
+            // Save, Update UI, Clear Form
+            saveEvents();
             renderSavedEventsList();
-            renderOrUpdateCountdownCard(dataToSave); // Render card không cần màu
+            renderOrUpdateCountdownCard(dataToSave); // Render the updated/new card
             clearEditSelection();
+            return true; // Indicate success
         }
 
+        /**
+         * Loads event data into the form for editing.
+         * @param {number} id - The event ID.
+         */
         function loadEventIntoForm(id) {
             const event = savedEvents.find(e => e.id === id);
-            if (!event) return;
+            if (!event) { showMessage("Không tìm thấy sự kiện.", "error"); return; }
+
+            // Populate form fields
             formTitle.textContent = "Chỉnh sửa sự kiện";
             editingEventIdInput.value = event.id;
             eventTitleInput.value = event.title;
-            try {
+            try { // Format date robustly
                 const dateForInput = new Date(event.date);
-                 const timezoneOffset = dateForInput.getTimezoneOffset() * 60000;
-                 const localISOTime = new Date(dateForInput.getTime() - timezoneOffset).toISOString().slice(0, 16);
+                 if (isNaN(dateForInput.getTime())) throw new Error("Invalid date");
+                const timezoneOffset = dateForInput.getTimezoneOffset() * 60000;
+                const localISOTime = new Date(dateForInput.getTime() - timezoneOffset).toISOString().slice(0, 16);
                 eventDateInput.value = localISOTime;
-            } catch (e) { eventDateInput.value = ''; }
-            // --- THAY ĐỔI: Xóa việc đặt giá trị input màu ---
-            // countdownColorInput.value = event.color || '#6366f1';
+            } catch (e) { eventDateInput.value = ''; console.error("Date format error:", e); }
+            eventIconInput.value = event.icon || '';
+            eventNotesInput.value = event.notes || '';
+            eventCategoryInput.value = event.category || '';
+            eventRecurringInput.checked = event.isRecurring || false; // Set checkbox state
 
+            // Highlight selected item
             document.querySelectorAll('.saved-event-item').forEach(item => item.classList.remove('selected'));
-            document.querySelector(`.saved-event-item[data-id="${id}"]`)?.classList.add('selected');
+            const selectedItem = document.querySelector(`.saved-event-item[data-id="${id}"]`);
+            if(selectedItem) { selectedItem.classList.add('selected'); selectedItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+
+            // Show form and adjust buttons
             if (!detailsVisible) { toggleDetailsVisibility(true); }
              startButton.style.display = 'block';
              saveButton.style.display = 'none';
@@ -505,65 +1086,71 @@
              eventTitleInput.focus();
         }
 
+        /**
+         * Clears the form and resets to "Add New" state.
+         */
         function clearEditSelection() {
             formTitle.textContent = "Thêm sự kiện mới";
             editingEventIdInput.value = '';
             eventTitleInput.value = '';
             eventDateInput.value = getDefaultDateTime();
-            // --- THAY ĐỔI: Xóa việc reset input màu ---
-            // countdownColorInput.value = '#6366f1';
+            eventIconInput.value = '';
+            eventNotesInput.value = '';
+            eventCategoryInput.value = '';
+            eventRecurringInput.checked = false; // Uncheck recurring box
             document.querySelectorAll('.saved-event-item').forEach(item => item.classList.remove('selected'));
              startButton.style.display = 'none';
              saveButton.style.display = 'block';
              newButton.textContent = 'Hủy / Tạo mới';
         }
 
-        // --- Event Listeners ---
-        startButton.addEventListener('click', () => {
+        // --- Event Listeners Setup ---
+        startButton.addEventListener('click', () => { // Update button
             const id = parseInt(editingEventIdInput.value);
-            if (!id) { showMessage("Chưa chọn sự kiện để cập nhật.", 'error'); return; }
-            const title = eventTitleInput.value.trim() || "Sự kiện không tên";
-            const date = eventDateInput.value;
-            // --- THAY ĐỔI: Xóa việc lấy giá trị màu ---
-            // const color = countdownColorInput.value;
-            if (!date) { showMessage("Vui lòng chọn ngày giờ.", 'error'); return; }
-            // --- THAY ĐỔI: Truyền đối tượng không có 'color' ---
-            addOrUpdateEvent({ id, title, date }, false);
-            showMessage(`Đã cập nhật sự kiện "${title}".`, 'success');
+            if (!id || isNaN(id)) { showMessage("Vui lòng chọn sự kiện để cập nhật.", 'info'); return; }
+            const success = addOrUpdateEvent({}, false);
+            if (success) { showMessage(`Đã cập nhật sự kiện "${eventTitleInput.value.trim() || 'Không có tiêu đề'}".`, 'success'); }
         });
 
-        saveButton.addEventListener('click', () => {
-            const title = eventTitleInput.value.trim();
-            const date = eventDateInput.value;
-            // --- THAY ĐỔI: Xóa việc lấy giá trị màu ---
-            // const color = countdownColorInput.value;
-            if (!title || !date) { showMessage("Vui lòng nhập tên và ngày giờ.", 'error'); return; }
-             if (new Date(date).getTime() < new Date().getTime()) { showMessage("Không thể lưu sự kiện trong quá khứ.", 'error'); return; }
-             // --- THAY ĐỔI: Truyền đối tượng không có 'color' ---
-            addOrUpdateEvent({ title, date }, true);
-            showMessage(`Đã lưu sự kiện mới "${title}".`, 'success');
+        saveButton.addEventListener('click', () => { // Save New button
+            const success = addOrUpdateEvent({}, true);
+            if (success) { showMessage(`Đã lưu sự kiện mới "${eventTitleInput.value.trim() || 'Không có tiêu đề'}".`, 'success'); }
         });
 
-        newButton.addEventListener('click', () => {
+        newButton.addEventListener('click', () => { // Cancel/New button
+             const wasEditing = !!editingEventIdInput.value;
             clearEditSelection();
-            showMessage("Đã hủy. Sẵn sàng tạo sự kiện mới.", 'info');
+            showMessage(wasEditing ? "Đã hủy chỉnh sửa." : "Đã xóa form.", 'info');
         });
 
-        toggleDetailsButton.addEventListener('click', () => {
+        toggleDetailsButton.addEventListener('click', () => { // Toggle details view
             toggleDetailsVisibility();
         });
 
         // --- Initialization ---
         window.addEventListener('load', () => {
-             loadEvents();
-             clearEditSelection();
-             toggleDetailsVisibility(false);
-             startButton.style.display = 'none';
+             loadEvents(); // Load existing events
+             clearEditSelection(); // Prepare form for new entry
+             startButton.style.display = 'none'; // Hide update button initially
+             checkIfNoCountdowns(); // Set initial placeholder visibility
+
+             // Initial check for passed recurring events on load
+             savedEvents.forEach(event => {
+                 if (event.isRecurring) {
+                     const targetTime = new Date(event.date).getTime();
+                     // Check if the saved date is valid and in the past
+                     if (!isNaN(targetTime) && targetTime < new Date().getTime()) {
+                         console.log(`Initial check: Handling passed recurring event: ${event.title}`);
+                         handleRecurringEvent(event); // Update date if necessary
+                     }
+                 }
+             });
+             // Re-render list and cards after potential initial updates
+             renderSavedEventsList();
+             renderAllActiveCountdowns();
         });
 
     </script>
 
 </body>
 </html>
-
-
