@@ -31,18 +31,11 @@
             width: 100%;
             max-width: 6xl; /* Tailwind class equivalent */
             margin-bottom: 2rem; /* Equivalent to mb-8 */
-            /*
-             * Use auto-fit: Creates as many columns as fit within the container.
-             * minmax(300px, 1fr): Each column is at least 300px wide,
-             * and expands equally (1fr) to fill extra space.
-             */
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            /* Center the grid items horizontally within the container */
             justify-content: center;
         }
         /* Styling for the placeholder message */
         #noActiveCountdowns {
-            /* Ensure the placeholder spans all columns if grid is empty */
             grid-column: 1 / -1; /* Span from first to last column line */
             text-align: center;
             color: #6b7280; /* text-gray-500 */
@@ -71,6 +64,7 @@
             margin-bottom: 0.5rem;
             text-align: center;
             word-break: break-word; /* Prevent long titles from overflowing */
+            padding-right: 1.5rem; /* Add padding to prevent overlap with delete button */
         }
         /* Icon styling within the card */
         .countdown-card .event-icon {
@@ -95,11 +89,33 @@
          .recurring-indicator {
             position: absolute;
             top: 0.5rem;
-            right: 0.5rem;
+            right: 2.5rem; /* Adjust position to avoid delete button */
             font-size: 0.75rem; /* Small icon */
             color: #6b7280; /* Medium gray */
             cursor: default; /* Indicate it's not clickable */
+            z-index: 1;
          }
+         /* === STYLE FOR DELETE BUTTON ON CARD === */
+         .card-delete-button {
+            position: absolute;
+            top: 0.3rem;
+            right: 0.3rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem; /* Make 'x' larger */
+            font-weight: bold;
+            color: #9ca3af; /* Lighter gray */
+            cursor: pointer;
+            padding: 0.2rem 0.5rem; /* Increase clickable area */
+            line-height: 1;
+            transition: color 0.2s ease;
+            z-index: 2; /* Ensure it's above recurring indicator */
+         }
+         .card-delete-button:hover {
+            color: #ef4444; /* Red on hover */
+         }
+         /* === END STYLE FOR DELETE BUTTON === */
+
 
         /* Layout for time units (Days, Hours, Mins, Secs) using Grid */
         .countdown-card .timer-display {
@@ -217,7 +233,7 @@
         /* Container for event info (title, date, category) */
         .saved-event-item .event-info {
             flex-grow: 1; /* Allow info to take available space */
-            margin-right: 1rem; /* Space before delete button */
+            /* margin-right: 1rem; REMOVED as delete button is gone */
             overflow: hidden; /* Prevent long text overflow */
         }
         /* Container for icon and title in the list */
@@ -255,23 +271,8 @@
             margin-top: 0.2rem;
             font-style: italic;
         }
-        /* Delete button styling */
-        .delete-button {
-            background-color: #FEE2E2; /* Light red background */
-            color: #DC2626; /* Red text */
-            border: none;
-            padding: 0.3rem 0.6rem;
-            border-radius: 0.375rem;
-            font-size: 0.8rem; /* Smaller font */
-            font-weight: 600; /* Semi-bold */
-            cursor: pointer;
-            transition: background-color 0.2s ease, color 0.2s ease;
-            flex-shrink: 0; /* Prevent button shrinking */
-        }
-        .delete-button:hover {
-            background-color: #FECACA; /* Slightly darker red on hover */
-            color: #B91C1C;
-        }
+        /* Delete button styling - REMOVED from list */
+        /* .delete-button { ... } */
 
         /* Toggle button styling */
         #toggleDetailsButton {
@@ -579,10 +580,12 @@
                 else { multipleCountdownsContainer.appendChild(cardElement); }
             }
 
-            cardElement.classList.toggle('recurring-active', eventData.isRecurring); // Use toggle for cleaner class management
+            cardElement.classList.toggle('recurring-active', eventData.isRecurring);
 
+            // === ADD DELETE BUTTON TO CARD HTML ===
             cardElement.innerHTML = `
                 ${eventData.isRecurring ? '<span class="recurring-indicator" title="Sự kiện lặp lại hàng năm">🔁</span>' : ''}
+                <button class="card-delete-button" data-id="${eventData.id}" aria-label="Xóa sự kiện này">&times;</button>
                 <div class="card-title-container">
                     ${eventData.icon ? `<span class="event-icon">${eventData.icon}</span>` : ''}
                     <h3 class="card-title">${eventData.title || 'Sự kiện không tên'}</h3>
@@ -597,8 +600,36 @@
                     `}
                 </div>
             `;
+            // === END ADD DELETE BUTTON ===
 
             timerDisplayElement = cardElement.querySelector('.timer-display');
+
+            // === ADD EVENT LISTENER FOR CARD DELETE BUTTON ===
+            const deleteBtn = cardElement.querySelector('.card-delete-button');
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent triggering other card clicks if any
+                    const eventIdStr = e.currentTarget.dataset.id;
+                    const eventId = parseInt(eventIdStr);
+                    const currentEvent = savedEvents.find(ev => ev.id === eventId);
+                    const eventTitle = currentEvent ? (currentEvent.title || 'Không có tiêu đề') : 'sự kiện này';
+
+                    console.log(`Card delete button clicked for ID: ${eventId}`);
+                    if (window.confirm(`Bạn có chắc chắn muốn xóa sự kiện "${eventTitle}" không?`)) {
+                         console.log(`Confirmed card deletion for ID: ${eventId}`);
+                         if (!isNaN(eventId)) {
+                             deleteEvent(eventId); // Call the main delete function
+                         } else {
+                             console.error("Invalid ID from card delete button:", eventIdStr);
+                             showMessage("Lỗi: Không thể xác định sự kiện để xóa.", "error");
+                         }
+                    } else {
+                         console.log(`Cancelled card deletion for ID: ${eventId}`);
+                    }
+                });
+            }
+            // === END ADD EVENT LISTENER ===
+
 
             if (isEffectivelyFinished) {
                 cardElement.classList.add('finished');
@@ -879,7 +910,7 @@
         }
 
         /**
-         * Renders the list of saved events.
+         * Renders the list of saved events in the management section.
          */
         function renderSavedEventsList() {
             savedEventsList.innerHTML = '';
@@ -899,9 +930,10 @@
             sortedEvents.forEach(event => {
                 const item = document.createElement('div');
                 item.className = 'saved-event-item';
-                item.dataset.id = event.id;
+                item.dataset.id = event.id; // Set dataset ID here
                 const recurringIndicator = event.isRecurring ? '<span title="Lặp lại hàng năm"> 🔁</span>' : '';
 
+                // === REMOVE DELETE BUTTON FROM LIST ITEM HTML ===
                 item.innerHTML = `
                     <div class="event-info">
                         <div class="event-title-container">
@@ -911,25 +943,16 @@
                         <div class="event-date">${formatDisplayDate(event.date)}</div>
                          ${event.category ? `<div class="event-category">Danh mục: ${event.category}</div>` : ''}
                     </div>
-                    <button class="delete-button" aria-label="Xóa sự kiện ${event.title || 'Không có tiêu đề'}">Xóa</button>
-                `;
+                    `;
+                // === END REMOVE DELETE BUTTON ===
+
 
                 item.querySelector('.event-info').addEventListener('click', () => loadEventIntoForm(event.id));
 
-                // === DEBUGGING: Add console logs to delete button listener ===
-                item.querySelector('.delete-button').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const eventId = event.id; // Get ID from the current event in the loop
-                    const eventTitle = event.title || 'Không có tiêu đề';
-                    console.log(`Delete button clicked for event ID: ${eventId}, Title: ${eventTitle}`); // Log click and ID
-                    if (window.confirm(`Bạn có chắc chắn muốn xóa sự kiện "${eventTitle}" không?`)) {
-                        console.log(`Confirmed deletion for event ID: ${eventId}`);
-                        deleteEvent(eventId); // Pass the correct ID
-                    } else {
-                        console.log(`Cancelled deletion for event ID: ${eventId}`);
-                    }
-                });
-                // === END DEBUGGING ===
+                // === REMOVE DELETE BUTTON EVENT LISTENER ===
+                // const deleteButton = item.querySelector('.delete-button');
+                // if (deleteButton) { ... } // Listener removed
+                // === END REMOVE LISTENER ===
 
                 savedEventsList.appendChild(item);
             });
@@ -940,17 +963,22 @@
          * @param {number} id - The event ID.
          */
         function deleteEvent(id) {
-             // === DEBUGGING: Log function call and ID ===
              console.log(`deleteEvent function called with ID: ${id}`);
-             // === END DEBUGGING ===
 
-             const eventIndex = savedEvents.findIndex(e => e.id === id); // Find index for potential removal check
+             // Ensure id is a valid number before proceeding
+             if (typeof id !== 'number' || isNaN(id)) {
+                 console.error("deleteEvent called with invalid ID:", id);
+                 showMessage("Lỗi: ID sự kiện không hợp lệ để xóa.", "error");
+                 return;
+             }
+
+             const eventIndex = savedEvents.findIndex(e => e.id === id);
              if (eventIndex === -1) {
                  console.warn(`Event with ID ${id} not found in savedEvents array.`);
-                 showMessage("Lỗi: Không tìm thấy sự kiện để xóa.", "error");
-                 return; // Exit if event not found
+                 // Don't show error message here as it might be redundant if card was already gone
+                 return;
              }
-             const eventToDelete = savedEvents[eventIndex]; // Get the event object
+             const eventToDelete = savedEvents[eventIndex];
              const eventTitle = eventToDelete.title || "Không có tiêu đề";
 
              console.log(`Attempting to delete: ID=${id}, Title=${eventTitle}`);
@@ -961,7 +989,7 @@
 
              // 2. Remove UI card
              console.log(`Removing card for ${id}`);
-             removeCountdownCard(id);
+             removeCountdownCard(id); // This function now handles the card removal
 
              // 3. Remove from array
              const originalLength = savedEvents.length;
@@ -972,12 +1000,12 @@
              console.log(`Saving events after deletion`);
              saveEvents();
 
-             // 5. Update management list
+             // 5. Update management list (which no longer shows delete buttons)
              console.log(`Rendering saved events list after deletion`);
              renderSavedEventsList();
 
              // 6. Clear form if editing deleted event
-             if (editingEventIdInput.value == id) {
+             if (editingEventIdInput.value == id) { // Compare value with the number ID
                   console.log(`Clearing edit selection as deleted event ${id} was being edited.`);
                   clearEditSelection();
              }
