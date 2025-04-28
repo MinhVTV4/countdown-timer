@@ -21,24 +21,6 @@
             background-color: #f7fafc;
         }
 
-        /* --- THAY ĐỔI: Container cho nhiều countdown - Sử dụng Tailwind classes --- */
-        /* Mặc định 1 cột, từ màn hình md (768px) trở lên là 2 cột */
-        /* #multipleCountdownsContainer {
-            display: grid;
-            grid-template-columns: 1fr; /* Default to 1 column */
-           /* gap: 1.5rem;
-            width: 100%;
-            max-width: 1200px;
-            margin-bottom: 2rem;
-        }
-        @media (min-width: 768px) { /* Tailwind 'md' breakpoint */
-           /* #multipleCountdownsContainer {
-                grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens and up */
-           /* }
-        } */
-        /* Chuyển sang dùng class Tailwind trực tiếp trong HTML */
-
-
         /* Kiểu cho từng ô countdown riêng lẻ */
         .countdown-card {
             background-color: white;
@@ -48,8 +30,9 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            border-top: 4px solid;
-            border-color: var(--card-border-color, #6366f1);
+            /* --- THAY ĐỔI: Xóa border-top --- */
+            /* border-top: 4px solid; */
+            /* border-color: var(--card-border-color, #6366f1); */
         }
 
         .countdown-card .card-title {
@@ -66,13 +49,12 @@
              text-align: center;
          }
 
-        /* --- THAY ĐỔI: Bố cục ô thời gian - Sử dụng Grid --- */
+        /* Bố cục ô thời gian - Sử dụng Grid */
         .countdown-card .timer-display {
-            display: grid; /* Chuyển sang Grid */
-            grid-template-columns: repeat(2, 1fr); /* Luôn là 2 cột */
-            gap: 0.75rem; /* Khoảng cách giữa các ô */
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
             width: 100%;
-            /* Xóa flex-wrap */
         }
 
         .countdown-card .time-box {
@@ -80,13 +62,12 @@
             padding: 0.6rem 1rem;
             border-radius: 0.375rem;
             text-align: center;
-            /* Bỏ min-width, flex-grow, flex-basis vì dùng Grid */
         }
         .countdown-card .time-value {
             font-size: 1.5rem;
             font-weight: 600;
             line-height: 1.2;
-            color: var(--countdown-text-color, white);
+            color: white; /* Đặt màu chữ trắng cố định */
         }
         .countdown-card .time-value.days-value {
              color: #EF4444; /* Màu đỏ cho ngày */
@@ -98,12 +79,12 @@
         }
          /* Trạng thái kết thúc */
         .countdown-card.finished {
-             border-color: #10b981;
+             /* --- THAY ĐỔI: Xóa border-color khi kết thúc --- */
+             /* border-color: #10b981; */
              opacity: 0.8;
         }
         .countdown-card.finished .timer-display {
-            /* Giữ nguyên kiểu hiển thị khi kết thúc */
-            grid-template-columns: 1fr; /* Quay về 1 cột để hiển thị text */
+            grid-template-columns: 1fr;
             font-size: 1.25rem;
             font-weight: 600;
             color: #059669;
@@ -132,10 +113,8 @@
         .delete-button { background-color: #FED7D7; color: #C53030; border: none; padding: 0.3rem 0.6rem; border-radius: 0.375rem; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s ease; }
         .delete-button:hover { background-color: #FBB6B6; }
 
-        #countdownColor { margin-left: 0.5rem; padding: 0; border: none; width: 40px; height: 40px; cursor: pointer; border-radius: 50%; background-color: transparent; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
-        #countdownColor::-webkit-color-swatch-wrapper { padding: 0; border-radius: 50%; }
-        #countdownColor::-webkit-color-swatch { border: 1px solid #ccc; border-radius: 50%; }
-        #countdownColor::-moz-color-swatch { border: 1px solid #ccc; border-radius: 50%; }
+        /* --- THAY ĐỔI: Xóa kiểu cho #countdownColor --- */
+        /* #countdownColor { ... } */
 
         #toggleDetailsButton { margin-top: 0; margin-bottom: 1rem; }
 
@@ -174,10 +153,6 @@
                     <label for="eventDate" class="block text-sm font-medium text-gray-700 mb-1">Ngày và giờ:</label>
                     <input type="datetime-local" id="eventDate" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                 </div>
-                <div class="mb-4 flex items-center">
-                    <label for="countdownColor" class="text-sm font-medium text-gray-700">Màu nhấn:</label>
-                    <input type="color" id="countdownColor" value="#6366f1">
-                </div>
                 <div class="form-button-group">
                      <button id="startButton" class="form-button">Cập nhật sự kiện</button>
                      <button id="saveButton" class="form-button">Lưu sự kiện mới</button>
@@ -202,13 +177,14 @@
         const editingEventIdInput = document.getElementById('editingEventId');
         const eventTitleInput = document.getElementById('eventTitle');
         const eventDateInput = document.getElementById('eventDate');
-        const countdownColorInput = document.getElementById('countdownColor');
+        // --- THAY ĐỔI: Xóa biến input màu ---
+        // const countdownColorInput = document.getElementById('countdownColor');
         const startButton = document.getElementById('startButton');
         const saveButton = document.getElementById('saveButton');
         const newButton = document.getElementById('newButton');
         const messageArea = document.getElementById('messageArea');
         const savedEventsList = document.getElementById('savedEventsList');
-        const noEventsMessage = document.getElementById('noEventsMessage'); // Keep reference for cloning
+        const noEventsMessage = document.getElementById('noEventsMessage');
         const detailsContainer = document.getElementById('detailsContainer');
         const toggleDetailsButton = document.getElementById('toggleDetailsButton');
 
@@ -273,27 +249,24 @@
             const now = new Date().getTime();
             const distance = targetTime - now;
             const isFinished = distance < 0;
-
-            // Find the placeholder message to potentially remove it
             const placeholder = multipleCountdownsContainer.querySelector('#noActiveCountdowns');
 
             if (!cardElement) {
                 cardElement = document.createElement('div');
                 cardElement.className = 'countdown-card';
                 cardElement.id = `countdown-${eventData.id}`;
-                // Insert before the placeholder if it exists, otherwise append
                 if (placeholder) {
                      multipleCountdownsContainer.insertBefore(cardElement, placeholder);
                 } else {
                     multipleCountdownsContainer.appendChild(cardElement);
                 }
-                if (placeholder) placeholder.style.display = 'none'; // Hide placeholder
+                if (placeholder) placeholder.style.display = 'none';
             }
 
-            cardElement.style.setProperty('--card-border-color', eventData.color || '#6366f1');
-            cardElement.style.setProperty('--countdown-text-color', '#FFFFFF');
+            // --- THAY ĐỔI: Xóa việc đặt màu viền ---
+            // cardElement.style.setProperty('--card-border-color', eventData.color || '#6366f1');
+            // cardElement.style.setProperty('--countdown-text-color', '#FFFFFF'); // Không cần thiết nữa vì màu chữ time-value đã cố định
 
-            // --- THAY ĐỔI: Cấu trúc HTML cho timer-display (Ngày/Giờ hàng trên, Phút/Giây hàng dưới) ---
             cardElement.innerHTML = `
                 <h3 class="card-title">${eventData.title}</h3>
                 <p class="card-target-date">Đến: ${formatDisplayDate(eventData.date)}</p>
@@ -311,13 +284,11 @@
 
             if (isFinished) {
                 cardElement.classList.add('finished');
-                // Ensure the grid layout is reset for the finished message
                 timerDisplayElement.style.gridTemplateColumns = '1fr';
                 stopCountdownInterval(eventData.id);
             } else {
                 cardElement.classList.remove('finished');
-                 // Ensure the grid layout is set for active countdown
-                 timerDisplayElement.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                timerDisplayElement.style.gridTemplateColumns = 'repeat(2, 1fr)';
                 updateSingleCountdownTime(eventData.id, timerDisplayElement);
                 startCountdownInterval(eventData.id, timerDisplayElement);
             }
@@ -336,7 +307,6 @@
                 if (card && !card.classList.contains('finished')) {
                     timerDisplayElement.innerHTML = 'Đã đến giờ!';
                     card.classList.add('finished');
-                    // Reset grid for finished message
                     timerDisplayElement.style.gridTemplateColumns = '1fr';
                     stopCountdownInterval(eventId);
                 }
@@ -383,7 +353,6 @@
             if (card) {
                 card.remove();
             }
-            // Check if any cards remain, show placeholder if not
             if (multipleCountdownsContainer.querySelectorAll('.countdown-card').length === 0) {
                  const placeholder = multipleCountdownsContainer.querySelector('#noActiveCountdowns');
                  if(placeholder) placeholder.style.display = 'block';
@@ -391,25 +360,21 @@
         }
 
         function renderAllActiveCountdowns() {
-            // Clear only cards, keep the placeholder structure
             multipleCountdownsContainer.querySelectorAll('.countdown-card').forEach(card => card.remove());
             const placeholder = multipleCountdownsContainer.querySelector('#noActiveCountdowns');
-
             let hasAnyCountdown = savedEvents.length > 0;
 
             if (hasAnyCountdown) {
-                 if(placeholder) placeholder.style.display = 'none'; // Hide placeholder if we have events
+                 if(placeholder) placeholder.style.display = 'none';
                 savedEvents.forEach(event => {
                     const targetTime = new Date(event.date).getTime();
                     if (!isNaN(targetTime)) {
-                        renderOrUpdateCountdownCard(event); // This will add cards before placeholder
+                        renderOrUpdateCountdownCard(event);
                     }
                 });
             } else {
-                 // Ensure placeholder is visible if no events
                  if(placeholder) placeholder.style.display = 'block';
             }
-             // Double check after rendering if any cards were actually added
              if (multipleCountdownsContainer.querySelectorAll('.countdown-card').length > 0) {
                   if(placeholder) placeholder.style.display = 'none';
              }
@@ -421,6 +386,11 @@
             try {
                 savedEvents = storedEvents ? JSON.parse(storedEvents) : [];
                  if (!Array.isArray(savedEvents)) { savedEvents = []; }
+                 // --- THAY ĐỔI: Xóa thuộc tính 'color' nếu còn tồn tại từ phiên bản cũ ---
+                 savedEvents = savedEvents.map(event => {
+                     const { color, ...rest } = event; // Destructure để loại bỏ 'color'
+                     return rest; // Trả về đối tượng không có 'color'
+                 });
             } catch (e) {
                 console.error("Error parsing saved events:", e);
                 savedEvents = [];
@@ -428,11 +398,18 @@
             }
             renderSavedEventsList();
             renderAllActiveCountdowns();
+            // Lưu lại danh sách đã được làm sạch (loại bỏ thuộc tính color)
+            saveEvents();
         }
 
         function saveEvents() {
              try {
-                localStorage.setItem('countdownEvents', JSON.stringify(savedEvents));
+                 // Đảm bảo không lưu thuộc tính 'color'
+                 const eventsToSave = savedEvents.map(event => {
+                     const { color, ...rest } = event;
+                     return rest;
+                 });
+                localStorage.setItem('countdownEvents', JSON.stringify(eventsToSave));
              } catch (e) {
                  console.error("Error saving events:", e);
                  showMessage("Lỗi: Không thể lưu trạng thái.", 'error');
@@ -440,15 +417,15 @@
         }
 
         function renderSavedEventsList() {
-            savedEventsList.innerHTML = ''; // Clear list first
-            const placeholder = noEventsMessage.cloneNode(true); // Use the original as template
-            savedEventsList.appendChild(placeholder); // Add placeholder
+            savedEventsList.innerHTML = '';
+            const placeholder = noEventsMessage.cloneNode(true);
+            savedEventsList.appendChild(placeholder);
 
             if (savedEvents.length === 0) {
                 placeholder.style.display = 'block';
                 return;
             }
-            placeholder.style.display = 'none'; // Hide if we have events
+            placeholder.style.display = 'none';
 
             const sortedEvents = [...savedEvents].sort((a, b) => new Date(a.date) - new Date(b.date));
 
@@ -483,21 +460,24 @@
         }
 
         function addOrUpdateEvent(eventData, isNew) {
-            if (!eventData.title || !eventData.date) { showMessage("Lỗi: Thiếu tên hoặc ngày giờ.", 'error'); return; }
-            const targetTime = new Date(eventData.date).getTime();
+            // --- THAY ĐỔI: Xóa 'color' khỏi dữ liệu sự kiện ---
+            const { color, ...dataToSave } = eventData;
+
+            if (!dataToSave.title || !dataToSave.date) { showMessage("Lỗi: Thiếu tên hoặc ngày giờ.", 'error'); return; }
+            const targetTime = new Date(dataToSave.date).getTime();
              if (isNaN(targetTime)) { showMessage("Lỗi: Ngày giờ không hợp lệ.", 'error'); return; }
 
             if (isNew) {
-                eventData.id = Date.now();
-                savedEvents.push(eventData);
+                dataToSave.id = Date.now();
+                savedEvents.push(dataToSave);
             } else {
-                const index = savedEvents.findIndex(e => e.id == eventData.id);
-                if (index > -1) { savedEvents[index] = eventData; }
-                else { console.error("Update failed: ID not found", eventData.id); showMessage("Lỗi: Không tìm thấy sự kiện.", 'error'); return; }
+                const index = savedEvents.findIndex(e => e.id == dataToSave.id);
+                if (index > -1) { savedEvents[index] = dataToSave; }
+                else { console.error("Update failed: ID not found", dataToSave.id); showMessage("Lỗi: Không tìm thấy sự kiện.", 'error'); return; }
             }
-            saveEvents();
+            saveEvents(); // Lưu dữ liệu đã loại bỏ 'color'
             renderSavedEventsList();
-            renderOrUpdateCountdownCard(eventData);
+            renderOrUpdateCountdownCard(dataToSave); // Render card không cần màu
             clearEditSelection();
         }
 
@@ -513,7 +493,9 @@
                  const localISOTime = new Date(dateForInput.getTime() - timezoneOffset).toISOString().slice(0, 16);
                 eventDateInput.value = localISOTime;
             } catch (e) { eventDateInput.value = ''; }
-            countdownColorInput.value = event.color || '#6366f1';
+            // --- THAY ĐỔI: Xóa việc đặt giá trị input màu ---
+            // countdownColorInput.value = event.color || '#6366f1';
+
             document.querySelectorAll('.saved-event-item').forEach(item => item.classList.remove('selected'));
             document.querySelector(`.saved-event-item[data-id="${id}"]`)?.classList.add('selected');
             if (!detailsVisible) { toggleDetailsVisibility(true); }
@@ -528,7 +510,8 @@
             editingEventIdInput.value = '';
             eventTitleInput.value = '';
             eventDateInput.value = getDefaultDateTime();
-            countdownColorInput.value = '#6366f1';
+            // --- THAY ĐỔI: Xóa việc reset input màu ---
+            // countdownColorInput.value = '#6366f1';
             document.querySelectorAll('.saved-event-item').forEach(item => item.classList.remove('selected'));
              startButton.style.display = 'none';
              saveButton.style.display = 'block';
@@ -541,19 +524,23 @@
             if (!id) { showMessage("Chưa chọn sự kiện để cập nhật.", 'error'); return; }
             const title = eventTitleInput.value.trim() || "Sự kiện không tên";
             const date = eventDateInput.value;
-            const color = countdownColorInput.value;
+            // --- THAY ĐỔI: Xóa việc lấy giá trị màu ---
+            // const color = countdownColorInput.value;
             if (!date) { showMessage("Vui lòng chọn ngày giờ.", 'error'); return; }
-            addOrUpdateEvent({ id, title, date, color }, false);
+            // --- THAY ĐỔI: Truyền đối tượng không có 'color' ---
+            addOrUpdateEvent({ id, title, date }, false);
             showMessage(`Đã cập nhật sự kiện "${title}".`, 'success');
         });
 
         saveButton.addEventListener('click', () => {
             const title = eventTitleInput.value.trim();
             const date = eventDateInput.value;
-            const color = countdownColorInput.value;
+            // --- THAY ĐỔI: Xóa việc lấy giá trị màu ---
+            // const color = countdownColorInput.value;
             if (!title || !date) { showMessage("Vui lòng nhập tên và ngày giờ.", 'error'); return; }
              if (new Date(date).getTime() < new Date().getTime()) { showMessage("Không thể lưu sự kiện trong quá khứ.", 'error'); return; }
-            addOrUpdateEvent({ title, date, color }, true);
+             // --- THAY ĐỔI: Truyền đối tượng không có 'color' ---
+            addOrUpdateEvent({ title, date }, true);
             showMessage(`Đã lưu sự kiện mới "${title}".`, 'success');
         });
 
@@ -578,3 +565,5 @@
 
 </body>
 </html>
+
+
