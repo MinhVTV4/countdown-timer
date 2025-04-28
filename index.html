@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Điều Khiển Đếm Ngược Sự Kiện</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            background-color: #f7fafc;
+        }
+
+        /* Kiểu cho từng ô countdown riêng lẻ */
+        .countdown-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* --- THAY ĐỔI: Xóa border-top --- */
+            /* border-top: 4px solid; */
+            /* border-color: var(--card-border-color, #6366f1); */
+        }
+
+        .countdown-card .card-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+         .countdown-card .card-target-date {
+             font-size: 0.875rem;
+             color: #6b7280;
+             margin-bottom: 1rem;
+             text-align: center;
+         }
+
+        /* Bố cục ô thời gian - Sử dụng Grid */
+        .countdown-card .timer-display {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        .countdown-card .time-box {
+            background-color: #4A5568;
+            padding: 0.6rem 1rem;
+            border-radius: 0.375rem;
+            text-align: center;
+        }
+        .countdown-card .time-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            line-height: 1.2;
+            color: white; /* Đặt màu chữ trắng cố định */
+        }
+        .countdown-card .time-value.days-value {
+             color: #EF4444; /* Màu đỏ cho ngày */
+        }
+        .countdown-card .time-label {
+            font-size: 0.7rem;
+            color: #A0AEC0;
+            margin-top: 0.1rem;
+        }
+         /* Trạng thái kết thúc */
+        .countdown-card.finished {
+             /* --- THAY ĐỔI: Xóa border-color khi kết thúc --- */
+             /* border-color: #10b981; */
+             opacity: 0.8;
+        }
+        .countdown-card.finished .timer-display {
+            grid-template-columns: 1fr;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #059669;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+
+        /* --- Các kiểu khác giữ nguyên --- */
+        .message { padding: 0.75rem 1rem; border-radius: 0.375rem; margin-top: 1rem; margin-bottom: 1rem; display: none; text-align: center; width: 100%; max-width: 400px; }
+        .error-message { background-color: #FED7D7; color: #C53030; border: 1px solid #F56565; }
+        .success-message { background-color: #C6F6D5; color: #2F855A; border: 1px solid #68D391; }
+        .info-message { background-color: #EBF8FF; color: #3182CE; border: 1px solid #90CDF4; }
+
+        #detailsContainer { width: 100%; max-width: 500px; margin-top: 1.5rem; transition: opacity 0.3s ease, max-height 0.3s ease; overflow: hidden; }
+        #detailsContainer.hidden { opacity: 0; max-height: 0; margin-top: 0; padding: 0; border: none; }
+
+        #savedEventsList { width: 100%; background-color: white; border-radius: 0.5rem; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 1rem; }
+        .saved-event-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid #E2E8F0; cursor: pointer; transition: background-color 0.2s ease; }
+        .saved-event-item:last-child { border-bottom: none; }
+        .saved-event-item:hover { background-color: #F7FAFC; }
+        .saved-event-item.selected { background-color: #ebf8ff; border-left: 4px solid #3b82f6;}
+        .saved-event-item .event-info { flex-grow: 1; margin-right: 1rem; }
+        .saved-event-item .event-title { font-weight: 500; color: #2D3748; }
+        .saved-event-item .event-date { font-size: 0.875rem; color: #718096; }
+        .delete-button { background-color: #FED7D7; color: #C53030; border: none; padding: 0.3rem 0.6rem; border-radius: 0.375rem; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s ease; }
+        .delete-button:hover { background-color: #FBB6B6; }
+
+        /* --- THAY ĐỔI: Xóa kiểu cho #countdownColor --- */
+        /* #countdownColor { ... } */
+
+        #toggleDetailsButton { margin-top: 0; margin-bottom: 1rem; }
+
+        .form-button-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; }
+        .form-button { padding: 0.5rem 1rem; font-weight: 600; border-radius: 0.375rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); transition: all 0.2s ease-in-out; text-align: center; cursor: pointer; border: 1px solid transparent; }
+        .form-button:focus { outline: none; ring-offset: 2px; ring: 2px; }
+        #startButton { background-color: #3B82F6; color: white; } #startButton:hover { background-color: #2563EB; } #startButton:focus { ring-color: #60A5FA; }
+        #saveButton { background-color: #10B981; color: white; } #saveButton:hover { background-color: #059669; } #saveButton:focus { ring-color: #34D399; }
+        #newButton { background-color: #F97316; color: white; } #newButton:hover { background-color: #EA580C; } #newButton:focus { ring-color: #FB923C; }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    <div class="main-container">
+        <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-6 text-center">Bảng Điều Khiển Đếm Ngược</h1>
+
+        <div id="multipleCountdownsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mb-8">
+            <p id="noActiveCountdowns" class="text-center text-gray-500 col-span-1 md:col-span-2">Không có sự kiện nào đang đếm ngược. Hãy thêm một sự kiện mới!</p>
+        </div>
+
+        <button id="toggleDetailsButton" class="px-4 py-2 bg-gray-500 text-white text-sm font-semibold rounded-md shadow hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 transition duration-150 ease-in-out">
+             Hiện chi tiết quản lý
+         </button>
+
+         <div id="messageArea" class="message"></div>
+
+        <div id="detailsContainer" class="hidden">
+            <div id="inputFormContainer" class="w-full bg-white p-6 rounded-lg shadow-md mb-6">
+                 <h2 id="formTitle" class="text-xl font-semibold text-gray-700 mb-4 text-center">Thêm sự kiện mới</h2>
+                 <input type="hidden" id="editingEventId">
+                 <div class="mb-4">
+                    <label for="eventTitle" class="block text-sm font-medium text-gray-700 mb-1">Tên sự kiện:</label>
+                    <input type="text" id="eventTitle" placeholder="Ví dụ: Sinh nhật của tôi" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div class="mb-4">
+                    <label for="eventDate" class="block text-sm font-medium text-gray-700 mb-1">Ngày và giờ:</label>
+                    <input type="datetime-local" id="eventDate" class="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div class="form-button-group">
+                     <button id="startButton" class="form-button">Cập nhật sự kiện</button>
+                     <button id="saveButton" class="form-button">Lưu sự kiện mới</button>
+                     <button id="newButton" class="form-button">Hủy / Tạo mới</button>
+                </div>
+            </div>
+
+            <div id="savedEventsContainer" class="w-full">
+                 <h2 class="text-xl font-semibold text-gray-700 mb-3 text-center">Quản lý sự kiện đã lưu</h2>
+                 <div id="savedEventsList" class="max-h-80 overflow-y-auto bg-white rounded-lg shadow">
+                     <p id="noEventsMessage" class="text-center text-gray-500 py-4">Chưa có sự kiện nào được lưu.</p>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const multipleCountdownsContainer = document.getElementById('multipleCountdownsContainer');
+        const noActiveCountdownsMsg = document.getElementById('noActiveCountdowns');
+        const formTitle = document.getElementById('formTitle');
+        const editingEventIdInput = document.getElementById('editingEventId');
+        const eventTitleInput = document.getElementById('eventTitle');
+        const eventDateInput = document.getElementById('eventDate');
+        // --- THAY ĐỔI: Xóa biến input màu ---
+        // const countdownColorInput = document.getElementById('countdownColor');
+        const startButton = document.getElementById('startButton');
+        const saveButton = document.getElementById('saveButton');
+        const newButton = document.getElementById('newButton');
+        const messageArea = document.getElementById('messageArea');
+        const savedEventsList = document.getElementById('savedEventsList');
+        const noEventsMessage = document.getElementById('noEventsMessage');
+        const detailsContainer = document.getElementById('detailsContainer');
+        const toggleDetailsButton = document.getElementById('toggleDetailsButton');
+
+        // --- State Variables ---
+        let countdownIntervals = {};
+        let savedEvents = [];
+        let detailsVisible = false;
+
+        // --- Utility Functions ---
+        function getDefaultDateTime() {
+            const now = new Date();
+            now.setDate(now.getDate() + 1);
+            now.setHours(9, 0, 0, 0);
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        function formatDisplayDate(dateString) {
+            if (!dateString) return "";
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date)) return "Ngày không hợp lệ";
+                return date.toLocaleString('vi-VN', { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } catch (e) { return "Ngày không hợp lệ"; }
+        }
+
+        function showMessage(text, type = 'error') {
+            messageArea.textContent = text;
+            messageArea.className = `message ${type}-message`;
+            messageArea.style.display = 'block';
+            if (!detailsVisible) { messageArea.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+            setTimeout(() => { messageArea.style.display = 'none'; }, 5000);
+        }
+
+        function toggleDetailsVisibility(show) {
+            detailsVisible = (typeof show === 'boolean') ? show : !detailsVisible;
+            if (detailsVisible) {
+                detailsContainer.classList.remove('hidden');
+                detailsContainer.style.maxHeight = '1000px';
+                setTimeout(() => { detailsContainer.style.maxHeight = detailsContainer.scrollHeight + "px"; }, 50);
+                toggleDetailsButton.textContent = "Ẩn chi tiết quản lý";
+            } else {
+                 detailsContainer.style.maxHeight = "0";
+                 setTimeout(() => { detailsContainer.classList.add('hidden'); }, 300);
+                toggleDetailsButton.textContent = "Hiện chi tiết quản lý";
+                clearEditSelection();
+            }
+        }
+
+        // --- Countdown Display Logic ---
+
+        function renderOrUpdateCountdownCard(eventData) {
+            const existingCard = document.getElementById(`countdown-${eventData.id}`);
+            let cardElement = existingCard;
+            let timerDisplayElement;
+
+            const targetTime = new Date(eventData.date).getTime();
+            const now = new Date().getTime();
+            const distance = targetTime - now;
+            const isFinished = distance < 0;
+            const placeholder = multipleCountdownsContainer.querySelector('#noActiveCountdowns');
+
+            if (!cardElement) {
+                cardElement = document.createElement('div');
+                cardElement.className = 'countdown-card';
+                cardElement.id = `countdown-${eventData.id}`;
+                if (placeholder) {
+                     multipleCountdownsContainer.insertBefore(cardElement, placeholder);
+                } else {
+                    multipleCountdownsContainer.appendChild(cardElement);
+                }
+                if (placeholder) placeholder.style.display = 'none';
+            }
+
+            // --- THAY ĐỔI: Xóa việc đặt màu viền ---
+            // cardElement.style.setProperty('--card-border-color', eventData.color || '#6366f1');
+            // cardElement.style.setProperty('--countdown-text-color', '#FFFFFF'); // Không cần thiết nữa vì màu chữ time-value đã cố định
+
+            cardElement.innerHTML = `
+                <h3 class="card-title">${eventData.title}</h3>
+                <p class="card-target-date">Đến: ${formatDisplayDate(eventData.date)}</p>
+                <div class="timer-display">
+                    ${isFinished ? 'Đã đến giờ!' : `
+                        <div class="time-box"><div class="time-value days-value" data-unit="days">0</div><div class="time-label">Ngày</div></div>
+                        <div class="time-box"><div class="time-value" data-unit="hours">0</div><div class="time-label">Giờ</div></div>
+                        <div class="time-box"><div class="time-value" data-unit="minutes">0</div><div class="time-label">Phút</div></div>
+                        <div class="time-box"><div class="time-value" data-unit="seconds">0</div><div class="time-label">Giây</div></div>
+                    `}
+                </div>
+            `;
+
+            timerDisplayElement = cardElement.querySelector('.timer-display');
+
+            if (isFinished) {
+                cardElement.classList.add('finished');
+                timerDisplayElement.style.gridTemplateColumns = '1fr';
+                stopCountdownInterval(eventData.id);
+            } else {
+                cardElement.classList.remove('finished');
+                timerDisplayElement.style.gridTemplateColumns = 'repeat(2, 1fr)';
+                updateSingleCountdownTime(eventData.id, timerDisplayElement);
+                startCountdownInterval(eventData.id, timerDisplayElement);
+            }
+        }
+
+        function updateSingleCountdownTime(eventId, timerDisplayElement) {
+            const eventData = savedEvents.find(e => e.id === eventId);
+            if (!eventData || !timerDisplayElement) return;
+
+            const targetTime = new Date(eventData.date).getTime();
+            const now = new Date().getTime();
+            const distance = targetTime - now;
+
+            if (distance < 0) {
+                const card = timerDisplayElement.closest('.countdown-card');
+                if (card && !card.classList.contains('finished')) {
+                    timerDisplayElement.innerHTML = 'Đã đến giờ!';
+                    card.classList.add('finished');
+                    timerDisplayElement.style.gridTemplateColumns = '1fr';
+                    stopCountdownInterval(eventId);
+                }
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            const daysEl = timerDisplayElement.querySelector('[data-unit="days"]');
+            const hoursEl = timerDisplayElement.querySelector('[data-unit="hours"]');
+            const minutesEl = timerDisplayElement.querySelector('[data-unit="minutes"]');
+            const secondsEl = timerDisplayElement.querySelector('[data-unit="seconds"]');
+
+            if (daysEl && daysEl.textContent != days) daysEl.textContent = days;
+            if (hoursEl && hoursEl.textContent != hours) hoursEl.textContent = hours;
+            if (minutesEl && minutesEl.textContent != minutes) minutesEl.textContent = minutes;
+            if (secondsEl && secondsEl.textContent != seconds) secondsEl.textContent = seconds;
+        }
+
+        function startCountdownInterval(eventId, timerDisplayElement) {
+            stopCountdownInterval(eventId);
+            if (!timerDisplayElement || timerDisplayElement.closest('.countdown-card')?.classList.contains('finished')) {
+                 return;
+            }
+            if (!countdownIntervals[eventId]) {
+                 countdownIntervals[eventId] = setInterval(() => {
+                    updateSingleCountdownTime(eventId, timerDisplayElement);
+                 }, 1000);
+            }
+        }
+
+        function stopCountdownInterval(eventId) {
+            if (countdownIntervals[eventId]) {
+                clearInterval(countdownIntervals[eventId]);
+                delete countdownIntervals[eventId];
+            }
+        }
+
+        function removeCountdownCard(eventId) {
+            const card = document.getElementById(`countdown-${eventId}`);
+            if (card) {
+                card.remove();
+            }
+            if (multipleCountdownsContainer.querySelectorAll('.countdown-card').length === 0) {
+                 const placeholder = multipleCountdownsContainer.querySelector('#noActiveCountdowns');
+                 if(placeholder) placeholder.style.display = 'block';
+            }
+        }
+
+        function renderAllActiveCountdowns() {
+            multipleCountdownsContainer.querySelectorAll('.countdown-card').forEach(card => card.remove());
+            const placeholder = multipleCountdownsContainer.querySelector('#noActiveCountdowns');
+            let hasAnyCountdown = savedEvents.length > 0;
+
+            if (hasAnyCountdown) {
+                 if(placeholder) placeholder.style.display = 'none';
+                savedEvents.forEach(event => {
+                    const targetTime = new Date(event.date).getTime();
+                    if (!isNaN(targetTime)) {
+                        renderOrUpdateCountdownCard(event);
+                    }
+                });
+            } else {
+                 if(placeholder) placeholder.style.display = 'block';
+            }
+             if (multipleCountdownsContainer.querySelectorAll('.countdown-card').length > 0) {
+                  if(placeholder) placeholder.style.display = 'none';
+             }
+        }
+
+        // --- Local Storage & Event Management ---
+        function loadEvents() {
+            const storedEvents = localStorage.getItem('countdownEvents');
+            try {
+                savedEvents = storedEvents ? JSON.parse(storedEvents) : [];
+                 if (!Array.isArray(savedEvents)) { savedEvents = []; }
+                 // --- THAY ĐỔI: Xóa thuộc tính 'color' nếu còn tồn tại từ phiên bản cũ ---
+                 savedEvents = savedEvents.map(event => {
+                     const { color, ...rest } = event; // Destructure để loại bỏ 'color'
+                     return rest; // Trả về đối tượng không có 'color'
+                 });
+            } catch (e) {
+                console.error("Error parsing saved events:", e);
+                savedEvents = [];
+                localStorage.removeItem('countdownEvents');
+            }
+            renderSavedEventsList();
+            renderAllActiveCountdowns();
+            // Lưu lại danh sách đã được làm sạch (loại bỏ thuộc tính color)
+            saveEvents();
+        }
+
+        function saveEvents() {
+             try {
+                 // Đảm bảo không lưu thuộc tính 'color'
+                 const eventsToSave = savedEvents.map(event => {
+                     const { color, ...rest } = event;
+                     return rest;
+                 });
+                localStorage.setItem('countdownEvents', JSON.stringify(eventsToSave));
+             } catch (e) {
+                 console.error("Error saving events:", e);
+                 showMessage("Lỗi: Không thể lưu trạng thái.", 'error');
+             }
+        }
+
+        function renderSavedEventsList() {
+            savedEventsList.innerHTML = '';
+            const placeholder = noEventsMessage.cloneNode(true);
+            savedEventsList.appendChild(placeholder);
+
+            if (savedEvents.length === 0) {
+                placeholder.style.display = 'block';
+                return;
+            }
+            placeholder.style.display = 'none';
+
+            const sortedEvents = [...savedEvents].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            sortedEvents.forEach(event => {
+                const item = document.createElement('div');
+                item.className = 'saved-event-item';
+                item.dataset.id = event.id;
+                item.innerHTML = `
+                    <div class="event-info">
+                        <div class="event-title">${event.title || 'Không có tiêu đề'}</div>
+                        <div class="event-date">${formatDisplayDate(event.date)}</div>
+                    </div>
+                    <button class="delete-button" data-id="${event.id}">Xóa</button>
+                `;
+                item.querySelector('.event-info').addEventListener('click', () => loadEventIntoForm(event.id));
+                item.querySelector('.delete-button').addEventListener('click', (e) => { e.stopPropagation(); deleteEvent(event.id); });
+                savedEventsList.appendChild(item);
+            });
+        }
+
+        function deleteEvent(id) {
+             const eventToDelete = savedEvents.find(e => e.id === id);
+             if (!eventToDelete) return;
+             const eventTitle = eventToDelete.title || "Không có tiêu đề";
+             savedEvents = savedEvents.filter(event => event.id !== id);
+             saveEvents();
+             renderSavedEventsList();
+             stopCountdownInterval(id);
+             removeCountdownCard(id);
+             if (editingEventIdInput.value == id) { clearEditSelection(); }
+             showMessage(`Đã xóa sự kiện "${eventTitle}".`, 'success');
+        }
+
+        function addOrUpdateEvent(eventData, isNew) {
+            // --- THAY ĐỔI: Xóa 'color' khỏi dữ liệu sự kiện ---
+            const { color, ...dataToSave } = eventData;
+
+            if (!dataToSave.title || !dataToSave.date) { showMessage("Lỗi: Thiếu tên hoặc ngày giờ.", 'error'); return; }
+            const targetTime = new Date(dataToSave.date).getTime();
+             if (isNaN(targetTime)) { showMessage("Lỗi: Ngày giờ không hợp lệ.", 'error'); return; }
+
+            if (isNew) {
+                dataToSave.id = Date.now();
+                savedEvents.push(dataToSave);
+            } else {
+                const index = savedEvents.findIndex(e => e.id == dataToSave.id);
+                if (index > -1) { savedEvents[index] = dataToSave; }
+                else { console.error("Update failed: ID not found", dataToSave.id); showMessage("Lỗi: Không tìm thấy sự kiện.", 'error'); return; }
+            }
+            saveEvents(); // Lưu dữ liệu đã loại bỏ 'color'
+            renderSavedEventsList();
+            renderOrUpdateCountdownCard(dataToSave); // Render card không cần màu
+            clearEditSelection();
+        }
+
+        function loadEventIntoForm(id) {
+            const event = savedEvents.find(e => e.id === id);
+            if (!event) return;
+            formTitle.textContent = "Chỉnh sửa sự kiện";
+            editingEventIdInput.value = event.id;
+            eventTitleInput.value = event.title;
+            try {
+                const dateForInput = new Date(event.date);
+                 const timezoneOffset = dateForInput.getTimezoneOffset() * 60000;
+                 const localISOTime = new Date(dateForInput.getTime() - timezoneOffset).toISOString().slice(0, 16);
+                eventDateInput.value = localISOTime;
+            } catch (e) { eventDateInput.value = ''; }
+            // --- THAY ĐỔI: Xóa việc đặt giá trị input màu ---
+            // countdownColorInput.value = event.color || '#6366f1';
+
+            document.querySelectorAll('.saved-event-item').forEach(item => item.classList.remove('selected'));
+            document.querySelector(`.saved-event-item[data-id="${id}"]`)?.classList.add('selected');
+            if (!detailsVisible) { toggleDetailsVisibility(true); }
+             startButton.style.display = 'block';
+             saveButton.style.display = 'none';
+             newButton.textContent = 'Hủy chỉnh sửa';
+             eventTitleInput.focus();
+        }
+
+        function clearEditSelection() {
+            formTitle.textContent = "Thêm sự kiện mới";
+            editingEventIdInput.value = '';
+            eventTitleInput.value = '';
+            eventDateInput.value = getDefaultDateTime();
+            // --- THAY ĐỔI: Xóa việc reset input màu ---
+            // countdownColorInput.value = '#6366f1';
+            document.querySelectorAll('.saved-event-item').forEach(item => item.classList.remove('selected'));
+             startButton.style.display = 'none';
+             saveButton.style.display = 'block';
+             newButton.textContent = 'Hủy / Tạo mới';
+        }
+
+        // --- Event Listeners ---
+        startButton.addEventListener('click', () => {
+            const id = parseInt(editingEventIdInput.value);
+            if (!id) { showMessage("Chưa chọn sự kiện để cập nhật.", 'error'); return; }
+            const title = eventTitleInput.value.trim() || "Sự kiện không tên";
+            const date = eventDateInput.value;
+            // --- THAY ĐỔI: Xóa việc lấy giá trị màu ---
+            // const color = countdownColorInput.value;
+            if (!date) { showMessage("Vui lòng chọn ngày giờ.", 'error'); return; }
+            // --- THAY ĐỔI: Truyền đối tượng không có 'color' ---
+            addOrUpdateEvent({ id, title, date }, false);
+            showMessage(`Đã cập nhật sự kiện "${title}".`, 'success');
+        });
+
+        saveButton.addEventListener('click', () => {
+            const title = eventTitleInput.value.trim();
+            const date = eventDateInput.value;
+            // --- THAY ĐỔI: Xóa việc lấy giá trị màu ---
+            // const color = countdownColorInput.value;
+            if (!title || !date) { showMessage("Vui lòng nhập tên và ngày giờ.", 'error'); return; }
+             if (new Date(date).getTime() < new Date().getTime()) { showMessage("Không thể lưu sự kiện trong quá khứ.", 'error'); return; }
+             // --- THAY ĐỔI: Truyền đối tượng không có 'color' ---
+            addOrUpdateEvent({ title, date }, true);
+            showMessage(`Đã lưu sự kiện mới "${title}".`, 'success');
+        });
+
+        newButton.addEventListener('click', () => {
+            clearEditSelection();
+            showMessage("Đã hủy. Sẵn sàng tạo sự kiện mới.", 'info');
+        });
+
+        toggleDetailsButton.addEventListener('click', () => {
+            toggleDetailsVisibility();
+        });
+
+        // --- Initialization ---
+        window.addEventListener('load', () => {
+             loadEvents();
+             clearEditSelection();
+             toggleDetailsVisibility(false);
+             startButton.style.display = 'none';
+        });
+
+    </script>
+
+</body>
+</html>
+
+
